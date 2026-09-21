@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Shield, Zap, Globe, ArrowRight, Star,
-  CheckCircle
+  CheckCircle, BookOpen
 } from 'lucide-react';
 
 /* ============================================================
@@ -303,6 +303,101 @@ const trustItems = [
   { icon: CheckCircle, text: 'No Signup' },
 ];
 
+const blogPosts = [
+  {
+    slug: 'how-to-merge-pdf-files',
+    title: 'How to Merge PDF Files: Complete Guide 2025',
+    excerpt: 'Learn how to combine multiple PDF files into one document quickly and securely — right in your browser.',
+    date: '2025-01-15',
+    readTime: '5 min read',
+    category: 'Tutorial',
+    content: `
+      <h2>What is PDF Merging?</h2>
+      <p>PDF merging is the process of combining two or more separate PDF files into a single, unified document. Instead of sending multiple attachments or dealing with scattered pages, merging lets you create one clean file that contains everything in the order you choose.</p>
+      <p>Whether you are a student compiling research, a professional preparing a report, or someone organizing personal documents, merging PDFs is one of the most common document tasks in 2025.</p>
+
+      <h2>Why Merge PDF Files?</h2>
+      <p>There are many practical reasons to merge PDF files:</p>
+      <ul>
+        <li><strong>Better organization:</strong> Keep related documents together in one file.</li>
+        <li><strong>Easier sharing:</strong> Send one file instead of ten attachments.</li>
+        <li><strong>Professional look:</strong> Combine invoices, reports, or contracts into a single polished PDF.</li>
+        <li><strong>Printing:</strong> Print everything in one go without managing multiple files.</li>
+      </ul>
+
+      <h2>How to Merge PDFs with PDFplayOfficial</h2>
+      <p>Merging PDFs with our tool is simple, fast, and 100% private — your files never leave your device.</p>
+      <ol>
+        <li>Open the <strong>Merge PDF</strong> tool from the homepage.</li>
+        <li>Drag and drop your PDF files (or click to browse).</li>
+        <li>Arrange the order by dragging the thumbnails.</li>
+        <li>Click <strong>Merge</strong> and download your combined PDF instantly.</li>
+      </ol>
+
+      <h2>Is It Safe to Merge PDFs Online?</h2>
+      <p>It depends on the tool. Many online PDF tools upload your files to a remote server, which raises privacy concerns — especially for sensitive documents like contracts, IDs, or medical records.</p>
+      <p>PDFplayOfficial runs entirely in your browser. Your files are processed locally on your own device, meaning nothing is ever uploaded, stored, or shared. This makes it one of the safest ways to merge PDFs online.</p>
+
+      <h2>Common Use Cases</h2>
+      <ul>
+        <li>Students combining lecture notes and assignments</li>
+        <li>Professionals merging monthly reports</li>
+        <li>Freelancers combining invoices for a client</li>
+        <li>Anyone organizing scanned documents</li>
+      </ul>
+
+      <h2>Final Thoughts</h2>
+      <p>Merging PDF files doesn't have to be complicated or risky. With a browser-based tool like PDFplayOfficial, you get speed, privacy, and simplicity — all in one place. Try it today and see how much time you save.</p>
+    `,
+  },
+  {
+    slug: 'compress-pdf-without-losing-quality',
+    title: 'How to Compress PDF Without Losing Quality',
+    excerpt: 'Reduce your PDF file size by up to 90% while keeping the quality intact. A complete step-by-step guide for 2025.',
+    date: '2025-01-10',
+    readTime: '4 min read',
+    category: 'Tutorial',
+    content: `
+      <h2>Why PDF File Size Matters</h2>
+      <p>Large PDF files are a common headache. They are hard to email, slow to upload, and can even fail to send through messaging apps. Whether you are submitting an assignment, sharing a report, or uploading a document to a portal, file size limits often get in the way.</p>
+      <p>The good news: you can compress a PDF by up to 90% without any noticeable loss in quality — if you use the right method.</p>
+
+      <h2>What Makes a PDF Large?</h2>
+      <p>PDFs get large for several reasons:</p>
+      <ul>
+        <li><strong>High-resolution images:</strong> Photos and graphics embedded at 300+ DPI.</li>
+        <li><strong>Embedded fonts:</strong> Multiple font families increase size.</li>
+        <li><strong>Scanned pages:</strong> Scans are essentially images, which are heavy.</li>
+        <li><strong>Unoptimized metadata:</strong> Extra hidden data adds weight.</li>
+      </ul>
+
+      <h2>How to Compress a PDF with PDFplayOfficial</h2>
+      <ol>
+        <li>Open the <strong>Compress PDF</strong> tool.</li>
+        <li>Drop your PDF file into the browser.</li>
+        <li>Choose your compression level (recommended: balanced).</li>
+        <li>Download the compressed PDF instantly.</li>
+      </ol>
+      <p>Because everything runs locally in your browser, your file never touches a server. That means zero wait time and complete privacy.</p>
+
+      <h2>Will Compression Reduce Quality?</h2>
+      <p>Not noticeably. Modern compression algorithms intelligently reduce image resolution and remove unnecessary data while preserving readability. For most documents (text, forms, reports), the difference is invisible to the human eye.</p>
+      <p>If you are compressing a photography portfolio or design file, use a lower compression level to preserve detail.</p>
+
+      <h2>Tips for Best Results</h2>
+      <ul>
+        <li>Always keep a backup of the original file.</li>
+        <li>Compress only after final edits are done.</li>
+        <li>For email, aim for under 10 MB.</li>
+        <li>For web upload, under 5 MB is usually safe.</li>
+      </ul>
+
+      <h2>Final Thoughts</h2>
+      <p>Compressing PDFs is one of the easiest ways to make your documents more shareable. With PDFplayOfficial, you get instant results, no uploads, and no signup — just drop, compress, and download.</p>
+    `,
+  },
+];
+
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
@@ -508,6 +603,67 @@ export default function Home() {
                 <h3 className="font-semibold text-white mb-1 text-[13px]">{s.title}</h3>
                 <p className="text-xs text-gray-500">{s.desc}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* BLOG SECTION */}
+      <section className="border-t border-white/5">
+        <div className="max-w-4xl mx-auto px-6 py-10">
+          <div className="max-w-2xl mb-8">
+            <div className="inline-flex items-center gap-1.5 mb-2">
+              <BookOpen className="w-3.5 h-3.5 text-red-400" />
+              <span className="text-[10px] font-bold text-gray-400 tracking-[0.2em] uppercase">
+                Blog
+              </span>
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight mb-1">
+              Guides & Tutorials
+            </h2>
+            <p className="text-gray-500 text-xs">
+              Learn how to get the most out of your PDFs.
+            </p>
+          </div>
+
+          <div className="space-y-12">
+            {blogPosts.map((post) => (
+              <article key={post.slug} className="scroll-mt-20">
+                <div className="mb-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[10px] font-bold text-red-400 tracking-wider uppercase">
+                      {post.category}
+                    </span>
+                    <span className="text-[10px] text-gray-600">•</span>
+                    <span className="text-[10px] text-gray-500">{post.readTime}</span>
+                    <span className="text-[10px] text-gray-600">•</span>
+                    <span className="text-[10px] text-gray-500">{post.date}</span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight mb-3">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">
+                    {post.excerpt}
+                  </p>
+                </div>
+
+                <div
+                  className="
+                    text-sm leading-relaxed
+                    [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-6 [&_h2]:mb-3
+                    [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-4 [&_h3]:mb-2
+                    [&_p]:text-gray-400 [&_p]:leading-relaxed [&_p]:mb-3
+                    [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:text-gray-400 [&_ul]:mb-3
+                    [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_ol]:text-gray-400 [&_ol]:mb-3
+                    [&_li]:leading-relaxed
+                    [&_strong]:text-white [&_strong]:font-semibold
+                    [&_a]:text-red-400 [&_a]:underline
+                  "
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
+
+                <div className="mt-10 border-b border-white/5" />
+              </article>
             ))}
           </div>
         </div>
