@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -512,7 +513,8 @@ export default function Home() {
           </div>
         </div>
       </section>
-      
+    
+
     </div>
   );
 }
