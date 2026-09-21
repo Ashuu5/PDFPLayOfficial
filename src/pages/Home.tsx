@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Shield, Zap, Globe, ArrowRight, Star,
-  CheckCircle, BookOpen
+  CheckCircle
 } from 'lucide-react';
-import { blogPosts } from '../data/blogPosts';
 
 /* ============================================================
    UNIQUE SVG LOGOS — one per tool
@@ -324,12 +323,12 @@ export default function Home() {
   return (
     <div className="text-gray-200">
 
-      {/* HERO — CHOTA */}
+      {/* HERO */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(239,68,68,0.15),transparent)] pointer-events-none" />
 
-        <div className="relative max-w-4xl mx-auto text-center px-6 pt-4 pb-4">
-          <div className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] backdrop-blur rounded-full px-3 py-1 mb-3">
+        <div className="relative max-w-4xl mx-auto text-center px-6 pt-8 pb-6">
+          <div className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] backdrop-blur rounded-full px-3 py-1 mb-4">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
@@ -339,13 +338,13 @@ export default function Home() {
             </span>
           </div>
 
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1] text-white mb-2">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-white mb-3">
             Every PDF tool
             <br />
             <span className="text-gray-500">you'll ever need.</span>
           </h1>
 
-          <p className="text-xs md:text-sm text-gray-400 max-w-2xl mx-auto leading-relaxed mb-4">
+          <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed mb-5">
             Merge, split, convert, compress, and edit PDFs.
             Everything runs <span className="text-white">locally in your browser</span> — nothing is ever uploaded to a server.
           </p>
@@ -371,7 +370,7 @@ export default function Home() {
 
       {/* TRUST STRIP */}
       <section className="border-y border-white/5 bg-gradient-to-r from-red-500/[0.04] via-transparent to-red-500/[0.04]">
-        <div className="max-w-6xl mx-auto px-6 py-2">
+        <div className="max-w-6xl mx-auto px-6 py-2.5">
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
             {trustItems.map((item, i) => {
               const Icon = item.icon;
@@ -513,83 +512,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ============================================================ */}
-      {/* BLOG SECTION — FULL ARTICLES (AdSense Friendly) */}
-      {/* ============================================================ */}
-      <section className="border-t border-white/5">
-        <div className="max-w-4xl mx-auto px-6 py-10">
-
-          {/* Section Header */}
-          <div className="max-w-2xl mb-8">
-            <div className="inline-flex items-center gap-1.5 mb-2">
-              <BookOpen className="w-3.5 h-3.5 text-red-400" />
-              <span className="text-[10px] font-bold text-gray-400 tracking-[0.2em] uppercase">
-                Blog
-              </span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight mb-1">
-              Guides & Tutorials
-            </h2>
-            <p className="text-gray-500 text-xs">
-              Learn how to get the most out of your PDFs.
-            </p>
-          </div>
-
-          {/* Articles */}
-          <div className="space-y-12">
-            {blogPosts.map((post) => (
-              <article
-                key={post.slug}
-                id={post.slug}
-                className="scroll-mt-20"
-              >
-                {/* Article Header */}
-                <div className="mb-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[10px] font-bold text-red-400 tracking-wider uppercase">
-                      {post.category}
-                    </span>
-                    <span className="text-[10px] text-gray-600">•</span>
-                    <span className="text-[10px] text-gray-500">{post.readTime}</span>
-                    <span className="text-[10px] text-gray-600">•</span>
-                    <span className="text-[10px] text-gray-500">{post.date}</span>
-                  </div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight mb-3">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">
-                    {post.excerpt}
-                  </p>
-                </div>
-
-                {/* Article Content */}
-                <div
-                  className="
-                    text-sm leading-relaxed
-                    [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-6 [&_h2]:mb-3
-                    [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-4 [&_h3]:mb-2
-                    [&_p]:text-gray-400 [&_p]:leading-relaxed [&_p]:mb-3
-                    [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:text-gray-400 [&_ul]:mb-3
-                    [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_ol]:text-gray-400 [&_ol]:mb-3
-                    [&_li]:leading-relaxed
-                    [&_strong]:text-white [&_strong]:font-semibold
-                    [&_a]:text-red-400 [&_a]:underline
-                  "
-                  dangerouslySetInnerHTML={{ __html: post.content }}
-                />
-
-                {/* Divider */}
-                <div className="mt-10 border-b border-white/5" />
-              </article>
-            ))}
-          </div>
-
-        </div>
-      </section>
-      {/* ============================================================ */}
-      {/* BLOG SECTION END */}
-      {/* ============================================================ */}
 
     </div>
   );
