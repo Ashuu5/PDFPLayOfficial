@@ -18,8 +18,8 @@ type Position = 'center' | 'diagonal' | 'tile' | 'top-left' | 'top-right' | 'bot
 export default function WatermarkPDF() {
   const [pdfFile, setPdfFile] = useState<{ name: string; arrayBuffer: ArrayBuffer; pageCount: number } | null>(null);
   const [pagePreview, setPagePreview] = useState<string>('');
-  const [pageWidth, setPageWidth] = useState(0);
-  const [pageHeight, setPageHeight] = useState(0);
+  const [_pageWidth, setPageWidth] = useState(0);
+const [_pageHeight, setPageHeight] = useState(0);
 
   const [text, setText] = useState('CONFIDENTIAL');
   const [fontSize, setFontSize] = useState(50);
