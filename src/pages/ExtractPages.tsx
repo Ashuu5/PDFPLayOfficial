@@ -76,7 +76,7 @@ export default function ExtractPages() {
           </div>
           {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
           <div className="flex gap-3">
-            <button onClick={extractPages} disabled={processing} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 disabled:opacity-50 transition-colors">
+            <button onClick={extractPages} disabled={processing} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 disabled:opacity-50 transition-colors">
               {processing ? <><Loader2 className="w-5 h-5 animate-spin" /> Extracting...</> : <><Download className="w-5 h-5" /> Extract Pages</>}
             </button>
             <button onClick={() => { setPdfFile(null); setPageInput(''); setError(''); }} disabled={processing} className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-colors">Reset</button>

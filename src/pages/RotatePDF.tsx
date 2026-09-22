@@ -415,15 +415,17 @@ export default function RotatePDF() {
             <button
               onClick={savePDF}
               disabled={processing}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-lime-500 to-green-600 text-black font-semibold rounded-xl shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-500/50 hover:scale-[1.01] disabled:opacity-50 transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white font-semibold rounded-xl shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/50 hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {processing ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" /> Saving...
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Saving...</span>
                 </>
               ) : (
                 <>
-                  <Download className="w-5 h-5" /> Save Rotated PDF
+                  <Download className="w-5 h-5" />
+                  <span>Save Rotated PDF</span>
                 </>
               )}
             </button>
