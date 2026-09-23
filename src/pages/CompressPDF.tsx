@@ -27,6 +27,20 @@ export default function CompressPDF() {
     }
   };
 
+  /* ✅ CHANGE FILE */
+  const openChangeFilePicker = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,.pdf';
+    input.onchange = (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        handleFileUpload(Array.from(target.files));
+      }
+    };
+    input.click();
+  };
+
   const compressPDF = async () => {
     if (!pdfFile) return;
     setProcessing(true);
@@ -68,17 +82,15 @@ export default function CompressPDF() {
     return (bytes / 1048576).toFixed(2) + ' MB';
   };
 
-  const reset = () => {
-    setPdfFile(null);
-    setResult(null);
-    setError('');
-  };
+  const activeBtn = 'p-4 rounded-xl border-2 text-left transition-all bg-gradient-to-br from-red-500 to-rose-600 border-red-400 shadow-lg shadow-red-500/30';
+  const inactiveBtn = 'p-4 rounded-xl border-2 text-left transition-all bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20';
 
   return (
     <ToolPage
       title="Compress PDF"
       description="Reduce PDF file size while maintaining quality. Processed entirely in your browser."
-      icon={<Minimize2 className="w-8 h-8 text-green-600" />}
+      icon={<Minimize2 className="w-8 h-8 text-red-500" />}
+      color="red"
     >
       {!pdfFile ? (
         <FileUpload
@@ -86,63 +98,77 @@ export default function CompressPDF() {
           multiple={false}
           title="Drop a PDF file here"
           subtitle="or click to browse"
-          icon={<Minimize2 className="w-8 h-8 text-green-600" />}
+          icon={<Minimize2 className="w-8 h-8 text-red-500" />}
         />
       ) : (
         <div>
-          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl mb-6">
-            <FileText className="w-10 h-10 text-green-500" />
-            <div>
-              <p className="font-medium text-gray-900">{pdfFile.name}</p>
-              <p className="text-sm text-gray-500">Size: {formatSize(pdfFile.size)}</p>
+          {/* FILE INFO */}
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-6">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-lg bg-red-500/20 border border-red-400/40 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5 text-red-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-white text-sm truncate">{pdfFile.name}</p>
+                <p className="text-xs text-gray-400">Size: {formatSize(pdfFile.size)}</p>
+              </div>
             </div>
+
+            {/* ✅ CHANGE FILE BUTTON */}
+            <button
+              onClick={openChangeFilePicker}
+              disabled={processing}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              Change file
+            </button>
           </div>
 
+          {/* COMPRESSION LEVEL */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">Compression Level</label>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Compression Level</label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 onClick={() => setCompressionLevel('low')}
-                className={'p-4 rounded-xl border-2 text-left transition-colors ' + (compressionLevel === 'low' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300')}
+                className={compressionLevel === 'low' ? activeBtn : inactiveBtn}
               >
-                <p className="font-semibold text-sm">Low Compression</p>
-                <p className="text-xs text-gray-500 mt-1">Best quality, smaller reduction</p>
+                <p className="font-bold text-sm text-white">Low Compression</p>
+                <p className={`text-xs mt-1 ${compressionLevel === 'low' ? 'text-white/80' : 'text-gray-400'}`}>Best quality, smaller reduction</p>
               </button>
               <button
                 onClick={() => setCompressionLevel('medium')}
-                className={'p-4 rounded-xl border-2 text-left transition-colors ' + (compressionLevel === 'medium' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300')}
+                className={compressionLevel === 'medium' ? activeBtn : inactiveBtn}
               >
-                <p className="font-semibold text-sm">Recommended</p>
-                <p className="text-xs text-gray-500 mt-1">Good balance of quality and size</p>
+                <p className="font-bold text-sm text-white">Recommended</p>
+                <p className={`text-xs mt-1 ${compressionLevel === 'medium' ? 'text-white/80' : 'text-gray-400'}`}>Good balance of quality and size</p>
               </button>
               <button
                 onClick={() => setCompressionLevel('high')}
-                className={'p-4 rounded-xl border-2 text-left transition-colors ' + (compressionLevel === 'high' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300')}
+                className={compressionLevel === 'high' ? activeBtn : inactiveBtn}
               >
-                <p className="font-semibold text-sm">High Compression</p>
-                <p className="text-xs text-gray-500 mt-1">Smallest size, may reduce quality</p>
+                <p className="font-bold text-sm text-white">High Compression</p>
+                <p className={`text-xs mt-1 ${compressionLevel === 'high' ? 'text-white/80' : 'text-gray-400'}`}>Smallest size, may reduce quality</p>
               </button>
             </div>
           </div>
 
-          <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
-            <p><strong>Note:</strong> Client-side compression works by optimizing PDF structure. For advanced image recompression, a server-side engine would be needed.</p>
-          </div>
+          
 
+          {/* RESULT */}
           {result && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+            <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-400/30">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <p className="text-xs text-gray-500">Original</p>
-                  <p className="font-bold text-gray-900">{formatSize(result.originalSize)}</p>
+                  <p className="text-xs text-gray-400">Original</p>
+                  <p className="font-bold text-white">{formatSize(result.originalSize)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Compressed</p>
-                  <p className="font-bold text-green-700">{formatSize(result.compressedSize)}</p>
+                  <p className="text-xs text-gray-400">Compressed</p>
+                  <p className="font-bold text-green-400">{formatSize(result.compressedSize)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Reduction</p>
-                  <p className="font-bold text-green-700">
+                  <p className="text-xs text-gray-400">Reduction</p>
+                  <p className="font-bold text-green-400">
                     {((1 - result.compressedSize / result.originalSize) * 100).toFixed(1)}%
                   </p>
                 </div>
@@ -150,26 +176,33 @@ export default function CompressPDF() {
             </div>
           )}
 
+          {/* ERROR */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-400/30 rounded-lg text-sm text-red-300">
+              {error}
+            </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={compressPDF}
-              disabled={processing}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 disabled:opacity-50 transition-colors"
-            >
-              {processing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Compressing...</>) : (<><Download className="w-5 h-5" /> Compress and Download</>)}
-            </button>
-            <button
-              onClick={reset}
-              disabled={processing}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-colors"
-            >
-              Reset
-            </button>
-          </div>
+          {/* ✅ ACTION — sirf Compress button, Reset hataya */}
+          <button
+            onClick={compressPDF}
+            disabled={processing}
+            className={`w-full flex items-center justify-center gap-2 px-6 py-3.5 font-bold rounded-xl transition-all ${
+              processing
+                ? 'bg-white/5 text-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/50 hover:scale-[1.01]'
+            }`}
+          >
+            {processing ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" /> Compressing...
+              </>
+            ) : (
+              <>
+                <Download className="w-5 h-5" /> Compress and Download
+              </>
+            )}
+          </button>
         </div>
       )}
     </ToolPage>

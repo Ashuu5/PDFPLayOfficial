@@ -1,13 +1,17 @@
 import { useState, useCallback, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
 // @ts-ignore
+import * as pdfjsLib from 'pdfjs-dist';
+// @ts-ignore
 import { saveAs } from 'file-saver';
 import FileUpload from '../components/FileUpload';
 import ToolPage from '../components/ToolPage';
 import {
   Merge, ChevronUp, ChevronDown, Download, Plus,
-  Loader2, GripVertical, FileText, X
+  Loader2, GripVertical, FileText, Trash2
 } from 'lucide-react';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
 interface PDFFile {
   id: string;
@@ -16,6 +20,7 @@ interface PDFFile {
   size: number;
   pageCount: number;
   arrayBuffer: ArrayBuffer;
+  thumbnail: string;
 }
 
 export default function MergePDF() {
@@ -23,8 +28,8 @@ export default function MergePDF() {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
+  const [loadingThumbs, setLoadingThumbs] = useState(false);
 
-  /* -------- DRAG REORDER -------- */
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
@@ -34,7 +39,6 @@ export default function MergePDF() {
     dragItem.current = index;
     setDraggingIndex(index);
     e.dataTransfer.effectAllowed = 'move';
-    // Firefox needs setData to enable drag
     e.dataTransfer.setData('text/plain', String(index));
   };
 
@@ -47,9 +51,7 @@ export default function MergePDF() {
     dragOverItem.current = index;
   };
 
-  const handleDragLeave = () => {
-    // don't clear immediately — dragOver of next card will set it
-  };
+  const handleDragLeave = () => {};
 
   const handleDrop = (e: React.DragEvent, index: number) => {
     e.preventDefault();
@@ -80,9 +82,30 @@ export default function MergePDF() {
     setDragOverIndex(null);
   };
 
-  /* -------- ADD FILES -------- */
+  const generateThumbnail = async (arrayBuffer: ArrayBuffer): Promise<string> => {
+    try {
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer.slice(0) }).promise;
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: 0.5 });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d')!;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      return canvas.toDataURL('image/jpeg', 0.8);
+    } catch {
+      return '';
+    }
+  };
+
   const addFiles = useCallback(async (newFiles: File[]) => {
     setError('');
+    setLoadingThumbs(true);
     const pdfFiles: PDFFile[] = [];
 
     for (const file of newFiles) {
@@ -90,6 +113,7 @@ export default function MergePDF() {
         const arrayBuffer = await file.arrayBuffer();
         const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
         const pageCount = pdfDoc.getPageCount();
+        const thumbnail = await generateThumbnail(arrayBuffer);
 
         pdfFiles.push({
           id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -98,6 +122,7 @@ export default function MergePDF() {
           size: file.size,
           pageCount,
           arrayBuffer,
+          thumbnail,
         });
       } catch (err) {
         setError(`Failed to load "${file.name}". It may be corrupted or not a valid PDF.`);
@@ -105,6 +130,7 @@ export default function MergePDF() {
     }
 
     setFiles((prev) => [...prev, ...pdfFiles]);
+    setLoadingThumbs(false);
   }, []);
 
   const removeFile = (id: string) => {
@@ -121,7 +147,6 @@ export default function MergePDF() {
     });
   };
 
-  /* -------- MERGE -------- */
   const mergePDFs = async () => {
     if (files.length < 2) {
       setError('Please add at least 2 PDF files to merge.');
@@ -205,6 +230,11 @@ export default function MergePDF() {
               <h3 className="font-semibold text-white">
                 {files.length} {files.length === 1 ? 'file' : 'files'} •{' '}
                 {totalPages} total {totalPages === 1 ? 'page' : 'pages'}
+                {loadingThumbs && (
+                  <span className="ml-2 text-xs text-gray-400 font-normal">
+                    (loading previews...)
+                  </span>
+                )}
               </h3>
               <button
                 onClick={openFilePicker}
@@ -232,13 +262,13 @@ export default function MergePDF() {
                       isDragging
                         ? 'border-red-400 opacity-30 scale-95 cursor-grabbing'
                         : isDragOver
-                        ? 'border-red-400 ring-2 ring-red-400/40 scale-[1.02] cursor-grab'
+                        ? 'border-red-400 ring-2 ring-red-400/40 scale-[1.02] cursor-grabbing'
                         : 'border-white/10 hover:border-red-400/40 hover:shadow-lg hover:shadow-red-500/15 hover:-translate-y-0.5 cursor-grab'
                     }`}
                   >
 
-                    {/* Drag handle — top-left */}
-                    <div className="absolute top-2 left-2 z-20 bg-black/60 backdrop-blur-sm rounded-md p-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    {/* Drag handle */}
+                    <div className="absolute top-2 left-2 z-20 bg-black/60 backdrop-blur-sm rounded-md p-1 opacity-70 group-hover:opacity-100 transition-opacity pointer-events-none">
                       <GripVertical className="w-3.5 h-3.5 text-white/80" />
                     </div>
 
@@ -247,32 +277,41 @@ export default function MergePDF() {
                       {index + 1}
                     </div>
 
-                    {/* Remove button */}
+                    {/* ✅ Dark black trash icon */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         removeFile(file.id);
                       }}
                       onMouseDown={(e) => e.stopPropagation()}
-                      className="absolute top-2 right-10 z-20 w-6 h-6 rounded-full bg-black/60 backdrop-blur-sm text-white hover:bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                      className="absolute top-2 right-10 z-30 w-6 h-6 flex items-center justify-center text-black hover:text-red-500 hover:scale-110 transition-all drop-shadow-lg"
                       title="Remove file"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                     </button>
 
-                    {/* Preview */}
-                    <div className="aspect-[3/4] bg-white/[0.03] flex items-center justify-center border-b border-white/5 pointer-events-none">
-                      <div className="w-20 h-24 bg-white rounded-md shadow-lg flex flex-col items-center justify-center gap-1 relative">
-                        <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                          <FileText className="w-2.5 h-2.5 text-white" />
+                    {/* PDF Preview */}
+                    <div className="aspect-[3/4] bg-white/[0.03] flex items-center justify-center border-b border-white/5 overflow-hidden">
+                      {file.thumbnail ? (
+                        <img
+                          src={file.thumbnail}
+                          alt={file.name}
+                          className="w-full h-full object-contain bg-white"
+                          draggable={false}
+                        />
+                      ) : (
+                        <div className="w-20 h-24 bg-white rounded-md shadow-lg flex flex-col items-center justify-center gap-1 relative">
+                          <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                            <FileText className="w-2.5 h-2.5 text-white" />
+                          </div>
+                          <div className="w-12 h-1 bg-gray-200 rounded-full mt-1"></div>
+                          <div className="w-12 h-1 bg-gray-200 rounded-full"></div>
+                          <div className="w-12 h-1 bg-gray-200 rounded-full"></div>
+                          <div className="w-8 h-1 bg-gray-200 rounded-full self-start ml-4"></div>
+                          <div className="w-12 h-1 bg-gray-200 rounded-full mt-1"></div>
+                          <div className="w-10 h-1 bg-gray-200 rounded-full self-start ml-4"></div>
                         </div>
-                        <div className="w-12 h-1 bg-gray-200 rounded-full mt-1"></div>
-                        <div className="w-12 h-1 bg-gray-200 rounded-full"></div>
-                        <div className="w-12 h-1 bg-gray-200 rounded-full"></div>
-                        <div className="w-8 h-1 bg-gray-200 rounded-full self-start ml-4"></div>
-                        <div className="w-12 h-1 bg-gray-200 rounded-full mt-1"></div>
-                        <div className="w-10 h-1 bg-gray-200 rounded-full self-start ml-4"></div>
-                      </div>
+                      )}
                     </div>
 
                     {/* File info */}
@@ -331,7 +370,7 @@ export default function MergePDF() {
             </div>
 
             <p className="text-xs text-gray-500 text-center mt-4">
-              💡 Drag cards to reorder · Click ✕ to remove
+              💡 Drag cards to reorder · Click 🗑️ to remove
             </p>
           </div>
 

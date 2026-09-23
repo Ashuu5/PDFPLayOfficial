@@ -35,6 +35,20 @@ export default function SplitPDF() {
     }
   };
 
+  /* ✅ CHANGE FILE */
+  const openChangeFilePicker = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,.pdf';
+    input.onchange = (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        handleFileUpload(Array.from(target.files));
+      }
+    };
+    input.click();
+  };
+
   const parsePageInput = (input: string, totalPages: number): number[][] => {
     const ranges: number[][] = [];
     const parts = input.split(',').map(s => s.trim()).filter(Boolean);
@@ -111,21 +125,15 @@ export default function SplitPDF() {
     }
   };
 
-  const reset = () => {
-    setPdfFile(null);
-    setPageInput('');
-    setError('');
-    setSuccess('');
-  };
-
-  const activeBtn = 'p-3 rounded-xl border-2 text-sm font-medium bg-blue-100 border-blue-500 text-blue-700';
-  const inactiveBtn = 'p-3 rounded-xl border-2 text-sm font-medium border-gray-200 text-gray-600';
+  const activeBtn = 'p-3 rounded-xl border-2 text-sm font-bold bg-gradient-to-br from-red-500 to-rose-600 border-red-400 text-white shadow-lg shadow-red-500/30 transition-all';
+  const inactiveBtn = 'p-3 rounded-xl border-2 text-sm font-medium bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all';
 
   return (
     <ToolPage
       title="Split PDF"
       description="Extract specific pages or split your PDF into multiple files."
-      icon={<Scissors className="w-8 h-8 text-orange-600" />}
+      icon={<Scissors className="w-8 h-8 text-red-500" />}
+      color="red"
     >
       {!pdfFile ? (
         <FileUpload
@@ -133,20 +141,37 @@ export default function SplitPDF() {
           multiple={false}
           title="Drop a PDF file here"
           subtitle="or click to browse"
-          icon={<Scissors className="w-8 h-8 text-orange-600" />}
+          icon={<Scissors className="w-8 h-8 text-red-500" />}
         />
       ) : (
         <div>
-          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl mb-6">
-            <FileText className="w-10 h-10 text-orange-500" />
-            <div>
-              <p className="font-medium text-gray-900">{pdfFile.name}</p>
-              <p className="text-sm text-gray-500">{pdfFile.pageCount} pages</p>
+          {/* FILE INFO */}
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-6">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-lg bg-red-500/20 border border-red-400/40 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5 text-red-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-white text-sm truncate">{pdfFile.name}</p>
+                <p className="text-xs text-gray-400">
+                  {pdfFile.pageCount} {pdfFile.pageCount === 1 ? 'page' : 'pages'} · {((pdfFile.size || 0) / 1024).toFixed(1)} KB
+                </p>
+              </div>
             </div>
+
+            {/* ✅ CHANGE FILE BUTTON */}
+            <button
+              onClick={openChangeFilePicker}
+              disabled={processing}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              Change file
+            </button>
           </div>
 
+          {/* SPLIT MODE */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">Split Mode</label>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Split Mode</label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button onClick={() => setSplitMode('pages')} className={splitMode === 'pages' ? activeBtn : inactiveBtn}>
                 Specific Pages
@@ -160,9 +185,10 @@ export default function SplitPDF() {
             </div>
           </div>
 
+          {/* PAGE INPUT */}
           {splitMode !== 'every' && (
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 {splitMode === 'pages' ? 'Enter page numbers (e.g., 1, 3, 5)' : 'Enter page ranges (e.g., 1-4, 6-8)'}
               </label>
               <input
@@ -170,41 +196,51 @@ export default function SplitPDF() {
                 value={pageInput}
                 onChange={(e) => setPageInput(e.target.value)}
                 placeholder={splitMode === 'pages' ? '1, 3, 5, 7' : '1-4, 6-8, 10'}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-red-400/50 transition-colors"
               />
               <p className="text-xs text-gray-500 mt-1">Total pages: {pdfFile.pageCount}</p>
             </div>
           )}
 
+          {/* EVERY PAGE INFO */}
           {splitMode === 'every' && (
-            <div className="mb-6 p-4 bg-blue-50 rounded-xl text-sm text-blue-700">
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-400/20 rounded-xl text-sm text-red-200">
               This will create {pdfFile.pageCount} separate PDF files as a ZIP.
             </div>
           )}
 
+          {/* ERROR / SUCCESS */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-400/30 rounded-lg text-sm text-red-300">
+              {error}
+            </div>
           )}
           {success && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">{success}</div>
+            <div className="mb-4 p-3 bg-green-500/10 border border-green-400/30 rounded-lg text-sm text-green-300 font-semibold">
+              {success}
+            </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={splitPDF}
-              disabled={processing}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50"
-            >
-              {processing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Splitting...</>) : (<><Download className="w-5 h-5" /> Split PDF</>)}
-            </button>
-            <button
-              onClick={reset}
-              disabled={processing}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 disabled:opacity-50"
-            >
-              Reset
-            </button>
-          </div>
+          {/* ✅ ACTIONS — sirf Split button, Reset hataya */}
+          <button
+            onClick={splitPDF}
+            disabled={processing}
+            className={`w-full flex items-center justify-center gap-2 px-6 py-3.5 font-bold rounded-xl transition-all ${
+              processing
+                ? 'bg-white/5 text-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/50 hover:scale-[1.01]'
+            }`}
+          >
+            {processing ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" /> Splitting...
+              </>
+            ) : (
+              <>
+                <Download className="w-5 h-5" /> Split PDF
+              </>
+            )}
+          </button>
         </div>
       )}
     </ToolPage>
