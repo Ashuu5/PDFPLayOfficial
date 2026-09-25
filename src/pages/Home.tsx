@@ -259,6 +259,23 @@ const JpgToPdfLogo = ({ size = 40 }: { size?: number }) => (
   </svg>
 );
 
+/* ✅ AUDIO TO TEXT LOGO */
+const AudioToTextLogo = ({ size = 40 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+    <defs>
+      <linearGradient id="hp-att" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#E11D48" />
+        <stop offset="100%" stopColor="#9F1239" />
+      </linearGradient>
+    </defs>
+    <rect width="48" height="48" rx="10" fill="url(#hp-att)" />
+    <rect x="19" y="10" width="10" height="18" rx="5" fill="white" />
+    <path d="M15 22 C15 28 19 31 24 31 C29 31 33 28 33 22" stroke="white" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+    <line x1="24" y1="31" x2="24" y2="37" stroke="white" strokeWidth="2.2" strokeLinecap="round" />
+    <line x1="19" y1="37" x2="29" y2="37" stroke="white" strokeWidth="2.2" strokeLinecap="round" />
+  </svg>
+);
+
 /* ============================================================
    TOOLS DATA
    ============================================================ */
@@ -293,6 +310,7 @@ const tools: Tool[] = [
   { name: 'PPT to PDF',      path: '/powerpoint-to-pdf', logo: PptToPdfLogo,    desc: 'Convert PowerPoint to PDF',                    category: 'convert-to' },
   { name: 'JPG to PDF',      path: '/jpg-to-pdf',        logo: JpgToPdfLogo,    desc: 'Convert images to PDF',                        category: 'convert-to' },
   { name: 'PDF to JPG',      path: '/pdf-to-jpg',        logo: PdfToJpgLogo,    desc: 'Convert PDF to images',                        category: 'convert-from' },
+  { name: 'Audio to Text',   path: '/audio-to-text',     logo: AudioToTextLogo, desc: 'Convert audio to text & write applications',   category: 'edit' },
 ];
 
 const trustItems = [
@@ -589,7 +607,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-3">
             {[
-              { n: '1', title: 'Pick a tool',    desc: 'Choose from 22 utilities.' },
+              { n: '1', title: 'Pick a tool',    desc: 'Choose from 23 utilities.' },
               { n: '2', title: 'Drop your file', desc: 'Files process right in your browser.' },
               { n: '3', title: 'Download',       desc: 'Grab your result instantly.' },
             ].map((s) => (

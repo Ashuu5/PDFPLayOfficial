@@ -29,6 +29,9 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Contact from './pages/Contact';
 
+// ✅ Audio to Text tool
+import AudioToText from './pages/AudioToText';
+
 function App() {
   return (
     <Router>
@@ -64,6 +67,9 @@ function App() {
           <Route path="/ocr-pdf" element={<OCRPDF />} />
           <Route path="/crop-pdf" element={<CropPDF />} />
           <Route path="/metadata-editor" element={<MetadataEditor />} />
+
+          {/* ✅ Audio to Text tool */}
+          <Route path="/audio-to-text" element={<AudioToText />} />
         </Routes>
       </Layout>
     </Router>
