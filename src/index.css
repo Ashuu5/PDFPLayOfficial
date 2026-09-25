@@ -32,6 +32,7 @@ body {
   background-attachment: fixed;
   color: #e5e7eb;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Subtle grid overlay */
@@ -49,7 +50,103 @@ body::before {
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent 75%);
 }
 
-/* ============ GLASS CARD ============ */
+/* ============================================================
+   LIGHT MODE
+   ============================================================ */
+html.light body {
+  background-color: #f5f5f7;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(239, 68, 68, 0.10), transparent 65%),
+    radial-gradient(ellipse 60% 50% at 85% 20%,  rgba(249, 115, 22, 0.05), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 15% 80%,  rgba(220, 38, 38, 0.05), transparent 60%);
+  color: #1f2937;
+}
+
+html.light body::before {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+}
+
+/* Light mode — glass card */
+html.light .glass-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 10px 30px -15px rgba(0,0,0,0.12);
+}
+
+html.light .glass-card:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,1), rgba(255,255,255,0.9));
+  border-color: rgba(239,68,68,0.3);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,1) inset,
+    0 25px 50px -20px rgba(239,68,68,0.2);
+  transform: translateY(-3px);
+}
+
+/* Light mode — drop zone */
+html.light .drop-zone {
+  background-color: rgba(0,0,0,0.02);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+html.light .drop-zone:hover {
+  background-color: rgba(239, 68, 68, 0.06);
+}
+
+/* Light mode — text overrides */
+html.light .text-white { color: #111827 !important; }
+html.light .text-gray-200 { color: #1f2937 !important; }
+html.light .text-gray-300 { color: #374151 !important; }
+html.light .text-gray-400 { color: #4b5563 !important; }
+html.light .text-gray-500 { color: #6b7280 !important; }
+html.light .text-gray-600 { color: #9ca3af !important; }
+
+/* Light mode — navbar/footer bg */
+html.light [class*="bg-[#08090d]"] { background-color: rgba(245,245,247,0.85) !important; }
+html.light [class*="bg-[#0d0f14]"] { background-color: rgba(245,245,247,0.95) !important; }
+html.light [class*="bg-white/"] { background-color: rgba(0,0,0,0.03) !important; }
+
+/* Light mode — borders */
+html.light [class*="border-white"] {
+  border-color: rgba(0,0,0,0.1) !important;
+}
+
+/* Light mode — scrollbar */
+html.light ::-webkit-scrollbar-track { background: #f5f5f7; }
+html.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+html.light ::-webkit-scrollbar-thumb:hover { background: rgba(239,68,68,0.5); }
+
+/* Light mode — tool page overrides */
+html.light main h1,
+html.light main h2,
+html.light main h3 { color: #111827 !important; }
+
+html.light main .text-gray-800,
+html.light main .text-gray-700,
+html.light main .text-gray-900,
+html.light main .text-slate-800,
+html.light main .text-slate-900 { color: #111827 !important; }
+
+html.light main .text-gray-600,
+html.light main .text-gray-500 { color: #6b7280 !important; }
+
+html.light main [class*="bg-white"]:not([class*="bg-white/"]),
+html.light main [class*="bg-gray-50"],
+html.light main [class*="bg-slate-50"] {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+html.light main div[class*="bg-white"]:not([class*="bg-white/"]),
+html.light main div[class*="bg-gray-50"] {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ============================================================
+   GLASS CARD (dark default)
+   ============================================================ */
 .glass-card {
   position: relative;
   background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
@@ -133,13 +230,12 @@ body::before {
 }
 .animate-glow { animation: glow-pulse 6s ease-in-out infinite; }
 
-/* ============ SCROLLBAR ============ */
+/* ============ SCROLLBAR (dark default) ============ */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #08090d; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(239,68,68,0.5); }
 
-/* ============ SELECTION ============ */
 ::selection {
   background: rgba(239, 68, 68, 0.35);
   color: #ffffff;
