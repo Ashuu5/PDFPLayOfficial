@@ -12,6 +12,7 @@
   "dependencies": {
     "docx": "^9.7.2",
     "file-saver": "^2.0.5",
+    "framer-motion": "^13.4.4",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "jszip": "^3.10.2",
