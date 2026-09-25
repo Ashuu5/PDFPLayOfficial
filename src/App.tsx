@@ -23,8 +23,6 @@ import ExtractPages from './pages/ExtractPages';
 import OCRPDF from './pages/OCRPDF';
 import CropPDF from './pages/CropPDF';
 import MetadataEditor from './pages/MetadataEditor';
-
-// ✅ Naye page imports
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Contact from './pages/Contact';
@@ -35,13 +33,9 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
-
-          {/* ✅ Legal pages */}
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/contact" element={<Contact />} />
-
-          {/* Tool routes */}
           <Route path="/merge-pdf" element={<MergePDF />} />
           <Route path="/split-pdf" element={<SplitPDF />} />
           <Route path="/compress-pdf" element={<CompressPDF />} />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   Shield, Zap, Globe, ArrowRight, Star,
   CheckCircle, BookOpen
@@ -420,65 +421,117 @@ export default function Home() {
 
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(239,68,68,0.15),transparent)] pointer-events-none" />
+        {/* Animated breathing glow */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
+        >
+          <motion.div
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full"
+            style={{
+              background: 'radial-gradient(circle, rgba(239,68,68,0.18) 0%, transparent 70%)',
+            }}
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.5, 0.9, 0.5],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </motion.div>
 
-        <div className="relative max-w-4xl mx-auto text-center px-6 pt-8 pb-6">
-          <div className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] backdrop-blur rounded-full px-3 py-1 mb-4">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
-            </span>
-            <span className="text-[10px] font-bold text-gray-400 tracking-[0.2em]">
-              ALL TOOLS · 100% FREE
-            </span>
-          </div>
+        <div className="relative max-w-4xl mx-auto text-center px-6 pt-12 pb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] backdrop-blur rounded-full px-3 py-1 mb-4">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
+              </span>
+              <span className="text-[10px] font-bold text-gray-400 tracking-[0.2em]">
+                ALL TOOLS · 100% FREE
+              </span>
+            </div>
 
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-white mb-3">
-            Every PDF tool
-            <br />
-            <span className="text-gray-500">you'll ever need.</span>
-          </h1>
-
-          <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed mb-5">
-            Merge, split, convert, compress, and edit PDFs.
-            Everything runs <span className="text-white">locally in your browser</span> — nothing is ever uploaded to a server.
-          </p>
-
-          <div className="flex items-center justify-center gap-2">
-            <a
-              href="#tools"
-              className="inline-flex items-center gap-1.5 bg-white text-gray-900 font-semibold px-4 py-2 rounded-xl hover:bg-gray-100 transition-all text-sm"
+            <motion.h1
+              className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-white mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             >
-              Browse Tools
-              <ArrowRight className="w-3.5 h-3.5" />
-            </a>
-            <Link
-              to="/merge-pdf"
-              className="inline-flex items-center gap-1.5 border border-white/15 bg-white/[0.03] text-white font-semibold px-4 py-2 rounded-xl hover:bg-white/[0.08] transition-all text-sm"
+              Every PDF tool
+              <br />
+              <span
+                style={{
+                  background: 'linear-gradient(180deg, #ffffff 0%, #71717a 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                you'll ever need.
+              </span>
+            </motion.h1>
+
+            <motion.p
+              className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Zap className="w-3.5 h-3.5 text-red-400" />
-              Start with Merge
-            </Link>
-          </div>
+              Merge, split, convert, compress, and edit PDFs.
+              Everything runs <span className="text-white">locally in your browser</span> — nothing is ever uploaded to a server.
+            </motion.p>
+
+            <motion.div
+              className="flex flex-wrap items-center justify-center gap-2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <a
+                href="#tools"
+                className="group inline-flex items-center gap-1.5 bg-white text-gray-900 font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-100 transition-all text-sm hover:scale-105 active:scale-95 shadow-[0_10px_30px_-10px_rgba(255,255,255,0.4)]"
+              >
+                Browse Tools
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </a>
+              <Link
+                to="/merge-pdf"
+                className="inline-flex items-center gap-1.5 border border-white/15 bg-white/[0.03] backdrop-blur text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-white/[0.08] hover:border-white/25 transition-all text-sm hover:scale-105 active:scale-95"
+              >
+                <Zap className="w-3.5 h-3.5 text-red-400" />
+                Start with Merge
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* TRUST STRIP */}
-      <section className="border-y border-white/5 bg-gradient-to-r from-red-500/[0.04] via-transparent to-red-500/[0.04]">
-        <div className="max-w-6xl mx-auto px-6 py-2.5">
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
+      <section className="border-y border-white/[0.06] bg-gradient-to-r from-red-500/[0.04] via-transparent to-red-500/[0.04] backdrop-blur">
+        <div className="max-w-6xl mx-auto px-6 py-3">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             {trustItems.map((item, i) => {
               const Icon = item.icon;
               return (
-                <div key={i} className="flex items-center gap-1.5 text-gray-400">
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.05 }}
+                  className="flex items-center gap-1.5 text-gray-400"
+                >
                   <Icon className="w-3 h-3 text-red-400" />
                   <span className="text-[10px] font-semibold tracking-wider uppercase">
                     {item.text}
                   </span>
-                  {i < trustItems.length - 1 && (
-                    <span className="text-gray-700 ml-3 hidden sm:inline">•</span>
-                  )}
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -486,72 +539,97 @@ export default function Home() {
       </section>
 
       {/* TOOLS */}
-      <section id="tools" className="max-w-6xl mx-auto px-6 py-8">
-        <div className="mb-4">
-          <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight mb-1">
+      <section id="tools" className="max-w-6xl mx-auto px-6 py-12">
+        <motion.div
+          className="mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-1">
             Tools
           </h2>
           <p className="text-gray-500 text-xs">
             {filteredTools.length} of {tools.length} tools shown
           </p>
-        </div>
+        </motion.div>
 
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        <motion.div
+          className="flex flex-wrap gap-1.5 mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 ${
                 activeCategory === cat.id
-                  ? 'bg-white text-gray-900'
+                  ? 'bg-white text-gray-900 shadow-[0_4px_15px_-4px_rgba(255,255,255,0.4)] scale-105'
                   : 'text-gray-400 hover:text-white hover:bg-white/[0.06] border border-white/10'
               }`}
             >
               {cat.label}
             </button>
           ))}
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-          {filteredTools.map((tool) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {filteredTools.map((tool, i) => {
             const Logo = tool.logo;
             return (
-              <Link
+              <motion.div
                 key={tool.path}
-                to={tool.path}
-                className="group flex items-center gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.03, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="shrink-0">
-                  <Logo size={34} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-[13px] font-semibold text-white truncate mb-0.5">
-                    {tool.name}
-                  </h3>
-                  <p className="text-[11px] text-gray-500 truncate">
-                    {tool.desc}
-                  </p>
-                </div>
-                <ArrowRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0" />
-              </Link>
+                <Link
+                  to={tool.path}
+                  className="group flex items-center gap-3 p-3.5 rounded-xl glass-card"
+                >
+                  <div className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                    <Logo size={34} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[13px] font-semibold text-white truncate mb-0.5">
+                      {tool.name}
+                    </h3>
+                    <p className="text-[11px] text-gray-500 truncate">
+                      {tool.desc}
+                    </p>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-red-400 group-hover:translate-x-1 transition-all shrink-0" />
+                </Link>
+              </motion.div>
             );
           })}
         </div>
       </section>
 
       {/* FEATURES */}
-      <section className="border-t border-white/5">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="max-w-2xl mb-5">
-            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight mb-1">
+      <section className="border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <motion.div
+            className="max-w-2xl mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-1">
               Built for privacy and speed
             </h2>
             <p className="text-gray-500 text-xs">
               No servers, no tracking, no compromises.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-3">
+          <div className="grid md:grid-cols-3 gap-4">
             {[
               { icon: Shield, title: '100% Private',    desc: 'Files never leave your device. Everything runs locally in your browser.' },
               { icon: Zap,    title: 'Instant Results', desc: 'No uploads or queues. Files process the moment you drop them in.' },
@@ -559,16 +637,20 @@ export default function Home() {
             ].map((f, i) => {
               const Icon = f.icon;
               return (
-                <div
+                <motion.div
                   key={i}
-                  className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.1] transition-all"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="p-5 rounded-2xl glass-card"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center mb-3">
-                    <Icon className="w-4 h-4 text-red-400" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-red-500/5 border border-red-500/20 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-red-400" />
                   </div>
-                  <h3 className="font-semibold text-white mb-1 text-[13px]">{f.title}</h3>
+                  <h3 className="font-semibold text-white mb-1.5 text-sm">{f.title}</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -576,59 +658,82 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="border-t border-white/5">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="max-w-2xl mb-5">
-            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight mb-1">
+      <section className="border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <motion.div
+            className="max-w-2xl mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-1">
               How it works
             </h2>
             <p className="text-gray-500 text-xs">
               Three steps. Zero friction.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-3">
+          <div className="grid md:grid-cols-3 gap-4">
             {[
               { n: '1', title: 'Pick a tool',    desc: 'Choose from 22 utilities.' },
               { n: '2', title: 'Drop your file', desc: 'Files process right in your browser.' },
               { n: '3', title: 'Download',       desc: 'Grab your result instantly.' },
-            ].map((s) => (
-              <div
+            ].map((s, i) => (
+              <motion.div
                 key={s.n}
-                className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="p-5 rounded-2xl glass-card relative overflow-hidden"
               >
-                <div className="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center text-white font-bold text-xs mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10 flex items-center justify-center text-white font-bold text-sm mb-4">
                   {s.n}
                 </div>
-                <h3 className="font-semibold text-white mb-1 text-[13px]">{s.title}</h3>
+                <h3 className="font-semibold text-white mb-1.5 text-sm">{s.title}</h3>
                 <p className="text-xs text-gray-500">{s.desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* BLOG SECTION */}
-      <section className="border-t border-white/5">
-        <div className="max-w-4xl mx-auto px-6 py-10">
-          <div className="max-w-2xl mb-8">
+      <section className="border-t border-white/[0.06]">
+        <div className="max-w-4xl mx-auto px-6 py-14">
+          <motion.div
+            className="max-w-2xl mb-10"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="inline-flex items-center gap-1.5 mb-2">
               <BookOpen className="w-3.5 h-3.5 text-red-400" />
               <span className="text-[10px] font-bold text-gray-400 tracking-[0.2em] uppercase">
                 Blog
               </span>
             </div>
-            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight mb-1">
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-1">
               Guides & Tutorials
             </h2>
             <p className="text-gray-500 text-xs">
               Learn how to get the most out of your PDFs.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="space-y-12">
-            {blogPosts.map((post) => (
-              <article key={post.slug} className="scroll-mt-20">
+          <div className="space-y-14">
+            {blogPosts.map((post, idx) => (
+              <motion.article
+                key={post.slug}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.6, delay: idx * 0.05 }}
+                className="scroll-mt-20"
+              >
                 <div className="mb-5">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-[10px] font-bold text-red-400 tracking-wider uppercase">
@@ -639,7 +744,7 @@ export default function Home() {
                     <span className="text-[10px] text-gray-600">•</span>
                     <span className="text-[10px] text-gray-500">{post.date}</span>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight mb-3">
+                  <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight mb-3">
                     {post.title}
                   </h3>
                   <p className="text-sm text-gray-400 leading-relaxed">
@@ -650,8 +755,8 @@ export default function Home() {
                 <div
                   className="
                     text-sm leading-relaxed
-                    [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-6 [&_h2]:mb-3
-                    [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-4 [&_h3]:mb-2
+                    [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-7 [&_h2]:mb-3
+                    [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-5 [&_h3]:mb-2
                     [&_p]:text-gray-400 [&_p]:leading-relaxed [&_p]:mb-3
                     [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:text-gray-400 [&_ul]:mb-3
                     [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_ol]:text-gray-400 [&_ol]:mb-3
@@ -662,8 +767,8 @@ export default function Home() {
                   dangerouslySetInnerHTML={{ __html: post.content }}
                 />
 
-                <div className="mt-10 border-b border-white/5" />
-              </article>
+                <div className="mt-12 border-b border-white/[0.06]" />
+              </motion.article>
             ))}
           </div>
         </div>
