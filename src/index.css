@@ -1,12 +1,13 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;700;800&family=Noto+Nastaliq+Urdu:wght@600&display=swap');
 
 @theme {
-  --color-primary-500: #6366f1;
-  --color-accent-500: #d946ef;
-  --color-success-500: #22c55e;
-  --color-warning-500: #f59e0b;
-  --color-danger-500: #ef4444;
-  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-paper: #FFFBF0;
+  --color-ink: #111111;
+  --color-lime: #D4FF32;
+  --color-paper-dark: #1a1d29;
+  --font-family-syne: 'Syne', sans-serif;
+  --font-family-sans: 'Inter', system-ui, sans-serif;
 }
 
 * {
@@ -19,369 +20,127 @@ html, body, #root {
   min-height: 100vh;
 }
 
+/* LIGHT BS STUDIO BACKGROUND - Video se behtar */
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #1a1d29;
+  background-color: #FFFBF0;
+  color: #111111;
+  /* Subtle paper texture + lime glow like BS Studio */
   background-image:
-    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(239, 68, 68, 0.20), transparent 65%),
-    radial-gradient(ellipse 60% 50% at 85% 20%,  rgba(249, 115, 22, 0.08), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 15% 80%,  rgba(220, 38, 38, 0.10), transparent 60%);
+    radial-gradient(ellipse 80% 50% at 10% 10%, rgba(212, 255, 50, 0.25), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 90%, rgba(255, 107, 107, 0.15), transparent 60%);
   background-attachment: fixed;
-  color: #e5e7eb;
 }
 
-/* ============ DROP ZONE ============ */
+/* ============ IMMERSION EFFECT ============ */
+.immersion-tool, .immersion-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.18s ease, background 0.18s ease;
+}
+
+/* ============ DROP ZONE - BS STUDIO STYLE ============ */
 .drop-zone {
-  border: 2px dashed rgba(239, 68, 68, 0.35);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  background-color: rgba(255, 255, 255, 0.04);
+  border: 3px dashed #111111;
+  border-radius: 20px;
+  background-color: #FFFFFF;
+  transition: all 0.2s ease;
+  box-shadow: 6px 6px 0 #111111;
 }
 .drop-zone:hover,
 .drop-zone.drag-over {
-  border-color: #f87171;
-  background-color: rgba(239, 68, 68, 0.12);
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+  border-color: #111111;
+  background-color: #D4FF32;
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 #111111;
 }
 
-/* ============ TOOL CARD ============ */
+/* ============ TOOL CARD - CLEARLY VISIBLE ============ */
 .tool-card {
-  transition: all 0.2s ease;
-  background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #FFFFFF;
+  border: 2.5px solid #111111;
+  border-radius: 20px;
+  box-shadow: 6px 6px 0 #111111;
+  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
 }
 .tool-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(248, 113, 113, 0.5);
-  background-color: rgba(239, 68, 68, 0.08);
-  box-shadow: 0 12px 24px -8px rgba(239, 68, 68, 0.35);
+  transform: translate(-3px, -3px) translateZ(20px);
+  background-color: #FFFBF0;
+  box-shadow: 10px 10px 0 #111111;
+  border-color: #111111;
 }
 
 /* ============ ANIMATIONS ============ */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in { animation: fadeIn 0.3s ease forwards; }
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-slide-up { animation: slideUp 0.5s ease forwards; }
+.animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.23,1,0.32,1) forwards; }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%      { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50%      { transform: translateY(-10px) rotate(1deg); }
 }
-.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-float { animation: float 4s ease-in-out infinite; }
 
-@keyframes pulse-border {
-  0%, 100% { border-color: #ef4444; }
-  50%      { border-color: #fca5a5; }
-}
-.processing { animation: pulse-border 2s ease-in-out infinite; }
+/* ============ SCROLLBAR - BS STYLE ============ */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #FFFBF0; border-left: 2px solid #111; }
+::-webkit-scrollbar-thumb { background: #111; border-radius: 10px; border: 2px solid #FFFBF0; }
+::-webkit-scrollbar-thumb:hover { background: #D4FF32; }
 
-/* ============ SCROLLBAR ============ */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #1a1d29; }
-::-webkit-scrollbar-thumb { background: #363a4d; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #4b5068; }
-
-/* ============ MARQUEE ============ */
-@keyframes marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-33.33%); }
-}
-.animate-marquee { animation: marquee 45s linear infinite; }
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* ============ TOOL PAGE - LIGHT THEME OVERRIDES ============ */
+main {
+  background: #FFFBF0 !important;
 }
 
-/* ============ GLOBAL RESETS ============ */
-a { color: inherit; text-decoration: none; }
-
-input, textarea, select, button { font-family: inherit; }
-input::placeholder, textarea::placeholder { color: #6b7280; }
-
-/* ============================================================
-   TOOL PAGE DARK THEME OVERRIDES
-   ============================================================ */
-main h1,
-main h2 {
-  color: #ffffff;
+main h1, main h2 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  color: #111 !important;
+  letter-spacing: -1px;
 }
 
-main .text-gray-800,
-main .text-gray-700,
-main .text-gray-900,
-main .text-slate-800,
-main .text-slate-900 {
-  color: #f3f4f6 !important;
+main .bg-white, main [class*="bg-white"] {
+  background-color: #FFFFFF !important;
+  border: 2.5px solid #111 !important;
+  border-radius: 18px !important;
+  box-shadow: 6px 6px 0 #111 !important;
 }
 
-main .text-gray-600,
-main .text-gray-500 {
-  color: #9ca3af !important;
-}
-
-/* ============================================================
-   DROP ZONE — DARK THEME
-   ============================================================ */
-
-main [class*="bg-white"]:not([class*="bg-white/"]),
-main [class*="bg-gray-50"],
-main [class*="bg-slate-50"],
-main [class*="bg-blue-50"],
-main [class*="bg-indigo-50"] {
-  background-color: rgba(255, 255, 255, 0.04) !important;
-}
-
-main .drop-zone,
-main [class*="border-dashed"] {
-  background-color: rgba(255, 255, 255, 0.03) !important;
-  border-color: rgba(239, 68, 68, 0.4) !important;
-  color: #e5e7eb !important;
-}
-
-main [class*="border-dashed"] h1,
-main [class*="border-dashed"] h2,
-main [class*="border-dashed"] h3,
-main [class*="border-dashed"] p,
-main [class*="border-dashed"] span,
-main [class*="border-dashed"] div {
-  color: inherit;
-}
-
-main .drop-zone h3,
-main .drop-zone h2,
-main .drop-zone h1,
-main [class*="border-dashed"] h3,
-main [class*="border-dashed"] h2 {
-  color: #ffffff !important;
-}
-
-main .drop-zone p,
-main [class*="border-dashed"] p {
-  color: #9ca3af !important;
-}
-
-/* ============================================================
-   TOOLBAR BUTTONS
-   ============================================================ */
-
-/* ---------- DARK BG BUTTONS ---------- */
+/* All primary buttons = BS Studio Lime + Black */
+main button[class*="from-"], 
+main button.bg-black,
 main button[class*="bg-gray-900"],
-main button[class*="bg-gray-800"],
-main button[class*="bg-slate-900"],
-main button[class*="bg-black"] {
-  background: linear-gradient(180deg, #d4fc4d 0%, #a3e635 100%) !important;
-  color: #0a0a0a !important;
-  font-weight: 700 !important;
-  border: none !important;
-  border-radius: 10px !important;
-  padding: 0.5rem 0.875rem !important;
-  box-shadow: 0 4px 12px rgba(163, 230, 53, 0.3) !important;
-  transition: all 0.15s ease !important;
-}
-
-main button[class*="bg-gray-900"]:hover,
-main button[class*="bg-gray-800"]:hover {
-  background: linear-gradient(180deg, #e6ff6b 0%, #bef264 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 16px rgba(163, 230, 53, 0.5) !important;
-}
-
-main button[class*="bg-gray-900"] svg,
-main button[class*="bg-gray-800"] svg {
-  color: #0a0a0a !important;
-  stroke: #0a0a0a !important;
-}
-
-/* ---------- DELETE BUTTON (Red) ---------- */
 main button[class*="bg-red-500"],
 main button[class*="bg-red-600"] {
-  background: linear-gradient(180deg, #fca5a5 0%, #ef4444 100%) !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  border: none !important;
-  border-radius: 10px !important;
-  padding: 0.5rem 0.875rem !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
-  transition: all 0.15s ease !important;
-}
-
-main button[class*="bg-red-500"]:hover,
-main button[class*="bg-red-600"]:hover {
-  background: linear-gradient(180deg, #fecaca 0%, #f87171 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.5) !important;
-}
-
-main button[class*="bg-red-500"] svg,
-main button[class*="bg-red-600"] svg {
-  color: #ffffff !important;
-  stroke: #ffffff !important;
-}
-
-/* ---------- LIGHT GRAY BUTTONS ---------- */
-main button[class*="bg-gray-100"],
-main button[class*="bg-gray-200"],
-main button[class*="bg-slate-100"],
-main button[class*="bg-slate-200"] {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: #f1f5f9 !important;
-  font-weight: 600 !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  border-radius: 10px !important;
-  padding: 0.5rem 0.875rem !important;
-  transition: all 0.15s ease !important;
-}
-
-main button[class*="bg-gray-100"]:hover,
-main button[class*="bg-gray-200"]:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  color: #ffffff !important;
-}
-
-main button[class*="bg-gray-100"] svg,
-main button[class*="bg-gray-200"] svg {
-  color: #f1f5f9 !important;
-  stroke: #f1f5f9 !important;
-}
-
-/* ---------- SELECTION INFO TEXT ---------- */
-main span[class*="text-gray-900"],
-main span[class*="text-gray-800"],
-main span[class*="text-gray-700"] {
-  color: #ffffff !important;
-}
-
-/* ---------- TOOLBAR BACKGROUND ---------- */
-main div[class*="bg-white"]:not([class*="bg-white/"]),
-main div[class*="bg-gray-50"] {
-  background-color: rgba(255, 255, 255, 0.03) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* ---------- HINT BOXES ---------- */
-main div[class*="bg-rose-50"] {
-  background-color: rgba(244, 63, 94, 0.1) !important;
-  border-color: rgba(244, 63, 94, 0.3) !important;
-  color: #fecdd3 !important;
-}
-
-main div[class*="bg-blue-50"] {
-  background-color: rgba(59, 130, 246, 0.1) !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
-  color: #bfdbfe !important;
-}
-
-main div[class*="bg-green-50"],
-main div[class*="bg-emerald-50"] {
-  background-color: rgba(16, 185, 129, 0.1) !important;
-  border-color: rgba(16, 185, 129, 0.3) !important;
-  color: #a7f3d0 !important;
-}
-
-main div[class*="bg-amber-50"],
-main div[class*="bg-yellow-50"] {
-  background-color: rgba(245, 158, 11, 0.1) !important;
-  border-color: rgba(245, 158, 11, 0.3) !important;
-  color: #fde68a !important;
-}
-
-/* ============================================================
-   ★ GLOBAL PRIMARY BUTTONS — Red style for ALL tool pages
-   Har tool ke Convert/Merge/Split/Download button ek jaisa RED
-   ============================================================ */
-
-/* Any button with a red/rose gradient background */
-main button[class*="from-red-500"],
-main button[class*="from-red-600"],
-main button[class*="from-rose-500"],
-main button[class*="from-rose-600"],
-main button[class*="from-purple-500"],
-main button[class*="from-emerald-500"],
-main button[class*="from-teal-500"],
-main button[class*="from-violet-500"],
-main button[class*="from-sky-500"],
-main button[class*="from-indigo-500"],
-main button[class*="from-blue-500"],
-main button[class*="from-fuchsia-500"],
-main button[class*="from-green-500"],
-main button[class*="from-cyan-500"] {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  border: none !important;
+  background: #D4FF32 !important;
+  color: #111 !important;
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 800 !important;
+  border: 2.5px solid #111 !important;
   border-radius: 12px !important;
-  box-shadow: 0 8px 20px -6px rgba(239, 68, 68, 0.45) !important;
-  transition: all 0.2s ease !important;
+  box-shadow: 4px 4px 0 #111 !important;
+  transition: all 0.15s ease !important;
 }
 
-/* Hover state */
-main button[class*="from-red-500"]:hover:not(:disabled),
-main button[class*="from-red-600"]:hover:not(:disabled),
-main button[class*="from-rose-500"]:hover:not(:disabled),
-main button[class*="from-rose-600"]:hover:not(:disabled),
-main button[class*="from-purple-500"]:hover:not(:disabled),
-main button[class*="from-emerald-500"]:hover:not(:disabled),
-main button[class*="from-teal-500"]:hover:not(:disabled),
-main button[class*="from-violet-500"]:hover:not(:disabled),
-main button[class*="from-sky-500"]:hover:not(:disabled),
-main button[class*="from-indigo-500"]:hover:not(:disabled),
-main button[class*="from-blue-500"]:hover:not(:disabled),
-main button[class*="from-fuchsia-500"]:hover:not(:disabled),
-main button[class*="from-green-500"]:hover:not(:disabled),
-main button[class*="from-cyan-500"]:hover:not(:disabled) {
-  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 12px 24px -6px rgba(239, 68, 68, 0.6) !important;
+main button[class*="from-"]:hover,
+main button.bg-black:hover {
+  background: #111 !important;
+  color: #fff !important;
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0 #111 !important;
 }
 
-/* Active (clicked) */
-main button[class*="from-red-500"]:active:not(:disabled),
-main button[class*="from-purple-500"]:active:not(:disabled),
-main button[class*="from-emerald-500"]:active:not(:disabled) {
-  transform: translateY(0) !important;
-  box-shadow: 0 4px 12px -3px rgba(239, 68, 68, 0.5) !important;
-}
-
-/* Disabled state */
-main button[class*="from-red-500"]:disabled,
-main button[class*="from-purple-500"]:disabled,
-main button[class*="from-emerald-500"]:disabled,
-main button[class*="from-teal-500"]:disabled,
-main button[class*="from-violet-500"]:disabled,
-main button[class*="from-sky-500"]:disabled,
-main button[class*="from-indigo-500"]:disabled,
-main button[class*="from-blue-500"]:disabled,
-main button[class*="from-fuchsia-500"]:disabled {
-  background: rgba(239, 68, 68, 0.15) !important;
-  color: rgba(255, 255, 255, 0.4) !important;
-  cursor: not-allowed !important;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-/* Icons inherit text color */
-main button[class*="from-red-500"] svg,
-main button[class*="from-purple-500"] svg,
-main button[class*="from-emerald-500"] svg,
-main button[class*="from-teal-500"] svg,
-main button[class*="from-violet-500"] svg,
-main button[class*="from-sky-500"] svg,
-main button[class*="from-indigo-500"] svg,
-main button[class*="from-blue-500"] svg,
-main button[class*="from-fuchsia-500"] svg {
-  color: inherit !important;
-  stroke: currentColor !important;
+/* Secondary buttons = white */
+main button[class*="bg-gray-100"],
+main button[class*="bg-gray-200"] {
+  background: #fff !important;
+  color: #111 !important;
+  border: 2.5px solid #111 !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  box-shadow: 3px 3px 0 #111 !important;
 }
