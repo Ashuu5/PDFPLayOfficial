@@ -413,14 +413,55 @@ export default function Layout({ children }: LayoutProps) {
             </div>
 
             <div className="flex items-center gap-1">
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.06] transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </button>
+              {/* ============ THEME TOGGLE WITH 3D TOOLTIP ============ */}
+              <div className="relative group/theme">
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.06] transition-all duration-300 group-hover/theme:scale-110"
+                  aria-label="Toggle theme"
+                >
+                  {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </button>
+
+                {/* 3D Tooltip */}
+                <div
+                  className="
+                    absolute top-full left-1/2 -translate-x-1/2 mt-3
+                    pointer-events-none
+                    opacity-0 translate-y-1
+                    group-hover/theme:opacity-100 group-hover/theme:translate-y-0
+                    transition-all duration-300 ease-out
+                    z-[100]
+                  "
+                >
+                  {/* Arrow */}
+                  <div
+                    className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45
+                               bg-gradient-to-br from-red-500 to-red-700
+                               border-t border-l border-red-300/50"
+                  />
+                  {/* Body */}
+                  <div
+                    className="
+                      px-3 py-1.5 rounded-lg
+                      text-[11px] font-bold tracking-wider uppercase whitespace-nowrap
+                      text-white
+                      border border-red-400/40
+                      backdrop-blur-xl
+                    "
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(239,68,68,0.95) 0%, rgba(153,27,27,0.95) 100%)',
+                      boxShadow:
+                        '0 1px 0 rgba(255,255,255,0.3) inset, 0 -1px 0 rgba(0,0,0,0.3) inset, 0 10px 25px -8px rgba(239,68,68,0.7), 0 4px 12px -4px rgba(0,0,0,0.6)',
+                      textShadow: '0 1px 0 rgba(0,0,0,0.4)',
+                      transform: 'perspective(400px) rotateX(-8deg)',
+                    }}
+                  >
+                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  </div>
+                </div>
+              </div>
 
               {/* Mobile menu */}
               <button
