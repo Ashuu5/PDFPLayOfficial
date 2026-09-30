@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, Sun, Moon } from 'lucide-react';
+import { Menu, X, ChevronDown, Sun, Moon, Sparkles } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -304,6 +304,22 @@ export default function Layout({ children }: LayoutProps) {
 
               <NavLink to="/compress-pdf" label="Compress" isActive={isActive('/compress-pdf')} />
 
+              {/* ✨ AI WORKSPACE BUBBLE BUTTON ✨ */}
+              <Link
+                to="/ai-workspace"
+                className="relative inline-flex items-center gap-1.5 ml-2 px-4 py-2 rounded-full text-[12px] font-bold tracking-tight text-white transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03]"
+                style={{
+                  background:
+                    'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #6d28d9 100%)',
+                  border: '1px solid rgba(196,181,253,0.5)',
+                  boxShadow:
+                    '0 8px 20px -6px rgba(139,92,246,0.7), 0 0 0 1px rgba(139,92,246,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+                }}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                AI Workspace
+              </Link>
+
               <div
                 className="relative"
                 onMouseEnter={() => setAllToolsOpen(true)}
@@ -423,7 +439,6 @@ export default function Layout({ children }: LayoutProps) {
                   {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </button>
 
-                {/* 3D Tooltip */}
                 <div
                   className="
                     absolute top-full left-1/2 -translate-x-1/2 mt-3
@@ -434,13 +449,11 @@ export default function Layout({ children }: LayoutProps) {
                     z-[100]
                   "
                 >
-                  {/* Arrow */}
                   <div
                     className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45
                                bg-gradient-to-br from-red-500 to-red-700
                                border-t border-l border-red-300/50"
                   />
-                  {/* Body */}
                   <div
                     className="
                       px-3 py-1.5 rounded-lg
@@ -480,6 +493,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="px-4 py-2 space-y-0.5">
               {[
                 { to: '/', label: 'Home' },
+                { to: '/ai-workspace', label: '✨ AI Workspace' },
                 { to: '/merge-pdf', label: 'Merge PDF' },
                 { to: '/split-pdf', label: 'Split PDF' },
                 { to: '/compress-pdf', label: 'Compress PDF' },

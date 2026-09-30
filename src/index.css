@@ -35,7 +35,6 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Subtle grid overlay */
 body::before {
   content: '';
   position: fixed;
@@ -68,7 +67,6 @@ html.light body::before {
     linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
 }
 
-/* Light mode — glass card */
 html.light .glass-card {
   background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
   border: 1px solid rgba(0,0,0,0.08);
@@ -86,7 +84,6 @@ html.light .glass-card:hover {
   transform: translateY(-3px);
 }
 
-/* Light mode — drop zone */
 html.light .drop-zone {
   background-color: rgba(0,0,0,0.02);
   border-color: rgba(239, 68, 68, 0.4);
@@ -95,7 +92,6 @@ html.light .drop-zone:hover {
   background-color: rgba(239, 68, 68, 0.06);
 }
 
-/* Light mode — text overrides */
 html.light .text-white { color: #111827 !important; }
 html.light .text-gray-200 { color: #1f2937 !important; }
 html.light .text-gray-300 { color: #374151 !important; }
@@ -103,22 +99,18 @@ html.light .text-gray-400 { color: #4b5563 !important; }
 html.light .text-gray-500 { color: #6b7280 !important; }
 html.light .text-gray-600 { color: #9ca3af !important; }
 
-/* Light mode — navbar/footer bg */
 html.light [class*="bg-[#08090d]"] { background-color: rgba(245,245,247,0.85) !important; }
 html.light [class*="bg-[#0d0f14]"] { background-color: rgba(245,245,247,0.95) !important; }
 html.light [class*="bg-white/"] { background-color: rgba(0,0,0,0.03) !important; }
 
-/* Light mode — borders */
 html.light [class*="border-white"] {
   border-color: rgba(0,0,0,0.1) !important;
 }
 
-/* Light mode — scrollbar */
 html.light ::-webkit-scrollbar-track { background: #f5f5f7; }
 html.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
 html.light ::-webkit-scrollbar-thumb:hover { background: rgba(239,68,68,0.5); }
 
-/* Light mode — tool page overrides */
 html.light main h1,
 html.light main h2,
 html.light main h3 { color: #111827 !important; }
@@ -145,7 +137,7 @@ html.light main div[class*="bg-gray-50"] {
 }
 
 /* ============================================================
-   GLASS CARD (dark default)
+   GLASS CARD
    ============================================================ */
 .glass-card {
   position: relative;
@@ -230,7 +222,7 @@ html.light main div[class*="bg-gray-50"] {
 }
 .animate-glow { animation: glow-pulse 6s ease-in-out infinite; }
 
-/* ============ SCROLLBAR (dark default) ============ */
+/* ============ SCROLLBAR ============ */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #08090d; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
@@ -310,7 +302,6 @@ main [class*="border-dashed"] p {
 /* ============================================================
    TOOLBAR BUTTONS
    ============================================================ */
-
 main button[class*="bg-gray-900"],
 main button[class*="bg-gray-800"],
 main button[class*="bg-slate-900"],
@@ -428,14 +419,12 @@ main div[class*="bg-yellow-50"] {
 }
 
 /* ============================================================
-   ★ GLOBAL PRIMARY BUTTONS — Red style
+   ★ GLOBAL PRIMARY BUTTONS — Red style (site ke liye)
    ============================================================ */
-
 main button[class*="from-red-500"],
 main button[class*="from-red-600"],
 main button[class*="from-rose-500"],
 main button[class*="from-rose-600"],
-main button[class*="from-purple-500"],
 main button[class*="from-emerald-500"],
 main button[class*="from-teal-500"],
 main button[class*="from-violet-500"],
@@ -458,7 +447,6 @@ main button[class*="from-red-500"]:hover:not(:disabled),
 main button[class*="from-red-600"]:hover:not(:disabled),
 main button[class*="from-rose-500"]:hover:not(:disabled),
 main button[class*="from-rose-600"]:hover:not(:disabled),
-main button[class*="from-purple-500"]:hover:not(:disabled),
 main button[class*="from-emerald-500"]:hover:not(:disabled),
 main button[class*="from-teal-500"]:hover:not(:disabled),
 main button[class*="from-violet-500"]:hover:not(:disabled),
@@ -474,7 +462,6 @@ main button[class*="from-cyan-500"]:hover:not(:disabled) {
 }
 
 main button[class*="from-red-500"]:disabled,
-main button[class*="from-purple-500"]:disabled,
 main button[class*="from-emerald-500"]:disabled,
 main button[class*="from-teal-500"]:disabled,
 main button[class*="from-violet-500"]:disabled,
@@ -490,7 +477,6 @@ main button[class*="from-fuchsia-500"]:disabled {
 }
 
 main button[class*="from-red-500"] svg,
-main button[class*="from-purple-500"] svg,
 main button[class*="from-emerald-500"] svg,
 main button[class*="from-teal-500"] svg,
 main button[class*="from-violet-500"] svg,
@@ -500,4 +486,71 @@ main button[class*="from-blue-500"] svg,
 main button[class*="from-fuchsia-500"] svg {
   color: inherit !important;
   stroke: currentColor !important;
+}
+
+/* ============================================================
+   ★★★ AI WORKSPACE — PURPLE THEME OVERRIDE ★★★
+   Yeh sab se neeche hai taake yeh upar wale red overrides ko override kar sake
+   ============================================================ */
+
+/* AI Workspace buttons — purple */
+main .ai-workspace button.ai-purple-btn,
+main .ai-workspace .ai-purple-btn {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #6d28d9 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 20px -6px rgba(139, 92, 246, 0.6) !important;
+  transition: all 0.2s ease !important;
+}
+
+main .ai-workspace button.ai-purple-btn:hover,
+main .ai-workspace .ai-purple-btn:hover {
+  background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #8b5cf6 100%) !important;
+  transform: translateY(-1px) scale(1.02) !important;
+  box-shadow: 0 12px 28px -6px rgba(139, 92, 246, 0.8) !important;
+}
+
+main .ai-workspace button.ai-purple-btn svg,
+main .ai-workspace .ai-purple-btn svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+/* AI Workspace active card — full purple gradient */
+main .ai-workspace .ai-purple-card {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #6d28d9 100%) !important;
+  border: none !important;
+  box-shadow: 0 20px 50px -15px rgba(139, 92, 246, 0.6) !important;
+}
+
+/* AI Workspace inactive card — light purple */
+main .ai-workspace .ai-purple-card-inactive {
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(109, 40, 217, 0.05) 100%) !important;
+  border: 1px solid rgba(167, 139, 250, 0.4) !important;
+}
+
+main .ai-workspace .ai-purple-card-inactive:hover {
+  border-color: rgba(167, 139, 250, 0.7) !important;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(109, 40, 217, 0.1) 100%) !important;
+}
+
+/* AI Workspace — purple text in headings */
+main .ai-workspace .ai-purple-text {
+  background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Light mode — AI Workspace adjustments */
+html.light main .ai-workspace .ai-purple-card-inactive {
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(109, 40, 217, 0.08) 100%) !important;
+  border: 1px solid rgba(167, 139, 250, 0.5) !important;
+}
+
+html.light main .ai-workspace .ai-purple-card-inactive:hover {
+  border-color: rgba(139, 92, 246, 0.8) !important;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.4) 0%, rgba(109, 40, 217, 0.15) 100%) !important;
 }
