@@ -26,7 +26,7 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const { messages, systemPrompt, model = 'gemini-2.5-flash' } = req.body;
+    const { messages, systemPrompt, model = 'gemini-3.8-flash' } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({
