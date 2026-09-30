@@ -1,5 +1,6 @@
 // ============================================================
 // DOC ENGINE — Templates se professional DOCX file banata hai
+// Supports userData to fill templates with custom values
 // ============================================================
 
 import {
@@ -12,7 +13,6 @@ import {
   TableCell,
   WidthType,
   AlignmentType,
-  HeadingLevel,
   BorderStyle,
   ImageRun,
 } from 'docx';
@@ -20,14 +20,38 @@ import { saveAs } from 'file-saver';
 import type { DocTemplate, DocSection } from './docTemplates';
 
 // ============================================================
+// TYPES
+// ============================================================
+export interface UserData {
+  [key: string]: string;
+}
+
+// ============================================================
+// REPLACE PLACEHOLDERS
+// Template text mein {{field}} ko userData se replace karo
+// ============================================================
+function replacePlaceholders(text: string, userData?: UserData): string {
+  if (!text) return '';
+  if (!userData) return text;
+
+  return text.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
+    const trimmedKey = key.trim();
+    const value = userData[trimmedKey];
+    return value !== undefined && value !== '' ? value : match;
+  });
+}
+
+// ============================================================
 // MAIN: Generate DOCX from template
 // ============================================================
-
-export async function generateDocx(template: DocTemplate): Promise<void> {
+export async function generateDocx(
+  template: DocTemplate,
+  userData?: UserData
+): Promise<void> {
   const children: (Paragraph | Table)[] = [];
 
   for (const section of template.sections) {
-    const node = renderSection(section);
+    const node = renderSection(section, userData);
     if (Array.isArray(node)) {
       children.push(...node);
     } else if (node) {
@@ -63,19 +87,21 @@ export async function generateDocx(template: DocTemplate): Promise<void> {
 // ============================================================
 // SECTION RENDERER
 // ============================================================
-
-function renderSection(section: DocSection): Paragraph | Table | (Paragraph | Table)[] | null {
+function renderSection(
+  section: DocSection,
+  userData?: UserData
+): Paragraph | Table | (Paragraph | Table)[] | null {
   switch (section.type) {
     case 'heading':
-      return renderHeading(section);
+      return renderHeading(section, userData);
     case 'subheading':
-      return renderSubheading(section);
+      return renderSubheading(section, userData);
     case 'paragraph':
-      return renderParagraph(section);
+      return renderParagraph(section, userData);
     case 'table':
-      return renderTable(section);
+      return renderTable(section, userData);
     case 'list':
-      return renderList(section);
+      return renderList(section, userData);
     case 'spacer':
       return new Paragraph({ text: '', spacing: { after: 200 } });
     case 'divider':
@@ -90,19 +116,19 @@ function renderSection(section: DocSection): Paragraph | Table | (Paragraph | Ta
 // ============================================================
 // HEADINGS
 // ============================================================
-
-function renderHeading(section: DocSection): Paragraph {
+function renderHeading(section: DocSection, userData?: UserData): Paragraph {
   const color = (section.color || '#111827').replace('#', '');
   const size = section.size || 24;
+  const text = replacePlaceholders(section.text || '', userData);
 
   return new Paragraph({
     alignment: convertAlignment(section.alignment),
     spacing: { before: 200, after: 200 },
     children: [
       new TextRun({
-        text: section.text || '',
+        text,
         bold: true,
-        size: size * 2, // docx uses half-points
+        size: size * 2,
         color: color,
         font: 'Calibri',
       }),
@@ -110,17 +136,18 @@ function renderHeading(section: DocSection): Paragraph {
   });
 }
 
-function renderSubheading(section: DocSection): Paragraph {
+function renderSubheading(section: DocSection, userData?: UserData): Paragraph {
   const color = (section.color || '#111827').replace('#', '');
+  const text = replacePlaceholders(section.text || '', userData);
 
   return new Paragraph({
     alignment: convertAlignment(section.alignment),
     spacing: { before: 150, after: 100 },
     children: [
       new TextRun({
-        text: section.text || '',
+        text,
         bold: true,
-        size: 24, // 12pt
+        size: 24,
         color: color,
         font: 'Calibri',
       }),
@@ -131,17 +158,17 @@ function renderSubheading(section: DocSection): Paragraph {
 // ============================================================
 // PARAGRAPHS
 // ============================================================
-
-function renderParagraph(section: DocSection): Paragraph {
+function renderParagraph(section: DocSection, userData?: UserData): Paragraph {
   const color = (section.color || '#374151').replace('#', '');
   const size = section.size || 11;
+  const text = replacePlaceholders(section.text || '', userData);
 
   return new Paragraph({
     alignment: convertAlignment(section.alignment),
     spacing: { after: 120, line: 276 },
     children: [
       new TextRun({
-        text: section.text || '',
+        text,
         bold: section.bold || false,
         italics: section.italic || false,
         size: size * 2,
@@ -155,38 +182,37 @@ function renderParagraph(section: DocSection): Paragraph {
 // ============================================================
 // LISTS
 // ============================================================
-
-function renderList(section: DocSection): Paragraph[] {
+function renderList(section: DocSection, userData?: UserData): Paragraph[] {
   if (!section.items) return [];
 
-  return section.items.map(
-    (item) =>
-      new Paragraph({
-        spacing: { after: 80, line: 276 },
-        indent: { left: 720 },
-        children: [
-          new TextRun({
-            text: '• ',
-            size: 22,
-            color: '6D28D9',
-            bold: true,
-            font: 'Calibri',
-          }),
-          new TextRun({
-            text: item,
-            size: 22,
-            color: '374151',
-            font: 'Calibri',
-          }),
-        ],
-      })
-  );
+  return section.items.map((item) => {
+    const text = replacePlaceholders(item, userData);
+
+    return new Paragraph({
+      spacing: { after: 80, line: 276 },
+      indent: { left: 720 },
+      children: [
+        new TextRun({
+          text: '• ',
+          size: 22,
+          color: '6D28D9',
+          bold: true,
+          font: 'Calibri',
+        }),
+        new TextRun({
+          text,
+          size: 22,
+          color: '374151',
+          font: 'Calibri',
+        }),
+      ],
+    });
+  });
 }
 
 // ============================================================
 // DIVIDER
 // ============================================================
-
 function renderDivider(): Paragraph {
   return new Paragraph({
     spacing: { before: 100, after: 100 },
@@ -205,7 +231,6 @@ function renderDivider(): Paragraph {
 // ============================================================
 // LOGO PLACEHOLDER
 // ============================================================
-
 function renderLogoPlaceholder(alignment: 'left' | 'center' | 'right'): Paragraph {
   return new Paragraph({
     alignment: convertAlignment(alignment),
@@ -225,13 +250,11 @@ function renderLogoPlaceholder(alignment: 'left' | 'center' | 'right'): Paragrap
 // ============================================================
 // TABLES
 // ============================================================
-
-function renderTable(section: DocSection): Table | null {
+function renderTable(section: DocSection, userData?: UserData): Table | null {
   if (!section.rows || section.rows.length === 0) return null;
 
   const rows = section.rows;
 
-  // Determine if it's a header table (first row looks like header)
   const isHeaderRow = (row: string[], index: number): boolean => {
     if (index !== 0) return false;
     const firstRowText = row.join(' ').toLowerCase();
@@ -251,11 +274,11 @@ function renderTable(section: DocSection): Table | null {
   const tableRows = rows.map((row, rowIndex) => {
     const isHeader = isHeaderRow(row, rowIndex);
     const isTotal =
-      row.some((cell) => cell.toUpperCase().includes('TOTAL')) ||
-      row.some((cell) => cell.toUpperCase().includes('SUBTOTAL'));
+      row.some((cell) => String(cell).toUpperCase().includes('TOTAL')) ||
+      row.some((cell) => String(cell).toUpperCase().includes('SUBTOTAL'));
 
     const cells = row.map((cell, colIndex) => {
-      const cellText = String(cell || '');
+      const cellText = replacePlaceholders(String(cell || ''), userData);
 
       return new TableCell({
         width:
@@ -310,7 +333,6 @@ function renderTable(section: DocSection): Table | null {
 // ============================================================
 // HELPERS
 // ============================================================
-
 function convertAlignment(
   alignment?: 'left' | 'center' | 'right'
 ): (typeof AlignmentType)[keyof typeof AlignmentType] {
@@ -325,9 +347,8 @@ function convertAlignment(
 }
 
 // ============================================================
-// EXTRA HELPER: For future logo upload support
+// EXTRA HELPER: Logo paragraph
 // ============================================================
-
 export function createLogoParagraph(imageBuffer: ArrayBuffer): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.CENTER,
