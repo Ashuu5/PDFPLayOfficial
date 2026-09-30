@@ -48,12 +48,11 @@ const { messages, systemPrompt, model = 'openai/gpt-oss-120b' } = req.body;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model,
-          messages: groqMessages,
-          temperature: 0.7,
-          max_tokens: 2048,
-          response_format: { type: 'json_object' },
-        }),
+            model,
+            messages: groqMessages,
+            temperature: 0.7,
+             max_tokens: 2048,
+         }),
       }
     );
 
