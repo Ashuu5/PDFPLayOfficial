@@ -26,8 +26,8 @@ import MetadataEditor from './pages/MetadataEditor';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Contact from './pages/Contact';
-import AIWorkspace from './pages/AIWorkspace';
-
+import AIExcel from './pages/AIExcel';
+import AIDoc from './pages/AIDoc';
 
 function App() {
   return (
@@ -60,8 +60,8 @@ function App() {
           <Route path="/ocr-pdf" element={<OCRPDF />} />
           <Route path="/crop-pdf" element={<CropPDF />} />
           <Route path="/metadata-editor" element={<MetadataEditor />} />
-          <Route path="/ai-workspace" element={<AIWorkspace />} />
-          
+          <Route path="/ai-excel" element={<AIExcel />} />
+          <Route path="/ai-doc" element={<AIDoc />} />
         </Routes>
       </Layout>
     </Router>

@@ -5,6 +5,7 @@ import {
   Shield, Zap, Globe, ArrowRight, Star,
   CheckCircle, BookOpen
 } from 'lucide-react';
+import HomeAIAssistant from '../components/HomeAIAssistant';
 
 /* ============================================================
    UNIQUE SVG LOGOS — one per tool
@@ -419,7 +420,7 @@ export default function Home() {
   return (
     <div className="text-gray-200">
 
-      {/* HERO */}
+      {/* HERO — 2 columns: AI Assistant (left) + Hero text (right) */}
       <section className="relative overflow-hidden">
         {/* Animated breathing glow */}
         <motion.div
@@ -441,74 +442,72 @@ export default function Home() {
           />
         </motion.div>
 
-        <div className="relative max-w-4xl mx-auto text-center px-6 pt-12 pb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] backdrop-blur rounded-full px-3 py-1 mb-4">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
-              </span>
-              <span className="text-[10px] font-bold text-gray-400 tracking-[0.2em]">
-                ALL TOOLS · 100% FREE
-              </span>
-            </div>
-
-            <motion.h1
-              className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-white mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            >
-              Every PDF tool
-              <br />
-              <span
-                style={{
-                  background: 'linear-gradient(180deg, #ffffff 0%, #71717a 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                you'll ever need.
-              </span>
-            </motion.h1>
-
-            <motion.p
-              className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            >
-              Merge, split, convert, compress, and edit PDFs.
-              Everything runs <span className="text-white">locally in your browser</span> — nothing is ever uploaded to a server.
-            </motion.p>
-
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            {/* LEFT: AI Assistant */}
             <motion.div
-              className="flex flex-wrap items-center justify-center gap-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <a
-                href="#tools"
-                className="group inline-flex items-center gap-1.5 bg-white text-gray-900 font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-100 transition-all text-sm hover:scale-105 active:scale-95 shadow-[0_10px_30px_-10px_rgba(255,255,255,0.4)]"
-              >
-                Browse Tools
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </a>
-              <Link
-                to="/merge-pdf"
-                className="inline-flex items-center gap-1.5 border border-white/15 bg-white/[0.03] backdrop-blur text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-white/[0.08] hover:border-white/25 transition-all text-sm hover:scale-105 active:scale-95"
-              >
-                <Zap className="w-3.5 h-3.5 text-red-400" />
-                Start with Merge
-              </Link>
+              <HomeAIAssistant />
             </motion.div>
-          </motion.div>
+
+            {/* RIGHT: Hero Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-center lg:text-left lg:pt-8"
+            >
+              <div className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] backdrop-blur rounded-full px-3 py-1 mb-4">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
+                </span>
+                <span className="text-[10px] font-bold text-gray-400 tracking-[0.2em]">
+                  ALL TOOLS · 100% FREE
+                </span>
+              </div>
+
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05] text-white mb-4">
+                Every PDF tool
+                <br />
+                <span
+                  style={{
+                    background: 'linear-gradient(180deg, #ffffff 0%, #71717a 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  you'll ever need.
+                </span>
+              </h1>
+
+              <p className="text-sm md:text-base text-gray-400 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-6">
+                Merge, split, convert, compress, and edit PDFs.
+                Everything runs <span className="text-white">locally in your browser</span> — nothing is ever uploaded to a server.
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                <a
+                  href="#tools"
+                  className="group inline-flex items-center gap-1.5 bg-white text-gray-900 font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-100 transition-all text-sm hover:scale-105 active:scale-95 shadow-[0_10px_30px_-10px_rgba(255,255,255,0.4)]"
+                >
+                  Browse Tools
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </a>
+                <Link
+                  to="/merge-pdf"
+                  className="inline-flex items-center gap-1.5 border border-white/15 bg-white/[0.03] backdrop-blur text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-white/[0.08] hover:border-white/25 transition-all text-sm hover:scale-105 active:scale-95"
+                >
+                  <Zap className="w-3.5 h-3.5 text-red-400" />
+                  Start with Merge
+                </Link>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 

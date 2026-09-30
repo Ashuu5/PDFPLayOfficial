@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, Sun, Moon, Sparkles } from 'lucide-react';
+import { Menu, X, ChevronDown, Sun, Moon, Sparkles, FileSpreadsheet, FileText } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -184,6 +184,37 @@ function NavLink({
   );
 }
 
+/* ============ AI BUBBLE BUTTON ============ */
+function AIBubbleButton({
+  to,
+  label,
+  icon: Icon,
+  isActive,
+}: {
+  to: string;
+  label: string;
+  icon: any;
+  isActive: boolean;
+}) {
+  return (
+    <Link
+      to={to}
+      className={`relative inline-flex items-center gap-1.5 ml-2 px-4 py-2 rounded-full text-[12px] font-bold tracking-tight text-white transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03] ${
+        isActive ? 'ring-2 ring-purple-300/50' : ''
+      }`}
+      style={{
+        background: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #6d28d9 100%)',
+        border: '1px solid rgba(196,181,253,0.5)',
+        boxShadow:
+          '0 8px 20px -6px rgba(139,92,246,0.7), 0 0 0 1px rgba(139,92,246,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+      }}
+    >
+      <Icon className="w-3.5 h-3.5" />
+      {label}
+    </Link>
+  );
+}
+
 export default function Layout({ children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
@@ -191,7 +222,6 @@ export default function Layout({ children }: LayoutProps) {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
-  /* ============ THEME STATE ============ */
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined') {
       return (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
@@ -256,6 +286,22 @@ export default function Layout({ children }: LayoutProps) {
             </Link>
 
             <div className="hidden md:flex items-center gap-0.5">
+              {/* ✨ AI EXCEL BUBBLE — FIRST */}
+              <AIBubbleButton
+                to="/ai-excel"
+                label="AI Excel"
+                icon={FileSpreadsheet}
+                isActive={isActive('/ai-excel')}
+              />
+
+              {/* ✨ AI DOC BUBBLE — SECOND */}
+              <AIBubbleButton
+                to="/ai-doc"
+                label="AI Doc"
+                icon={FileText}
+                isActive={isActive('/ai-doc')}
+              />
+
               <NavLink to="/merge-pdf" label="Merge" isActive={isActive('/merge-pdf')} />
               <NavLink to="/split-pdf" label="Split" isActive={isActive('/split-pdf')} />
 
@@ -303,22 +349,6 @@ export default function Layout({ children }: LayoutProps) {
               </div>
 
               <NavLink to="/compress-pdf" label="Compress" isActive={isActive('/compress-pdf')} />
-
-              {/* ✨ AI WORKSPACE BUBBLE BUTTON ✨ */}
-              <Link
-                to="/ai-workspace"
-                className="relative inline-flex items-center gap-1.5 ml-2 px-4 py-2 rounded-full text-[12px] font-bold tracking-tight text-white transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03]"
-                style={{
-                  background:
-                    'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #6d28d9 100%)',
-                  border: '1px solid rgba(196,181,253,0.5)',
-                  boxShadow:
-                    '0 8px 20px -6px rgba(139,92,246,0.7), 0 0 0 1px rgba(139,92,246,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
-                }}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                AI Workspace
-              </Link>
 
               <div
                 className="relative"
@@ -429,7 +459,6 @@ export default function Layout({ children }: LayoutProps) {
             </div>
 
             <div className="flex items-center gap-1">
-              {/* ============ THEME TOGGLE WITH 3D TOOLTIP ============ */}
               <div className="relative group/theme">
                 <button
                   onClick={toggleTheme}
@@ -476,7 +505,6 @@ export default function Layout({ children }: LayoutProps) {
                 </div>
               </div>
 
-              {/* Mobile menu */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.06] transition-colors"
@@ -493,7 +521,8 @@ export default function Layout({ children }: LayoutProps) {
             <div className="px-4 py-2 space-y-0.5">
               {[
                 { to: '/', label: 'Home' },
-                { to: '/ai-workspace', label: '✨ AI Workspace' },
+                { to: '/ai-excel', label: '📊 AI Excel' },
+                { to: '/ai-doc', label: '📄 AI Doc' },
                 { to: '/merge-pdf', label: 'Merge PDF' },
                 { to: '/split-pdf', label: 'Split PDF' },
                 { to: '/compress-pdf', label: 'Compress PDF' },
