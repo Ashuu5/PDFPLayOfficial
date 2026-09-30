@@ -119,7 +119,7 @@ export default function HomeAIAssistant() {
     inputRef.current?.focus();
   }, []);
 
-  // ============ TRACK IF USER IS AT BOTTOM OF CHAT ============
+  // ============ TRACK IF USER IS AT BOTTOM ============
   const handleScroll = () => {
     const container = chatContainerRef.current;
     if (!container) return;
@@ -131,7 +131,7 @@ export default function HomeAIAssistant() {
   // ============ AUTO-SCROLL ONLY IF USER WAS AT BOTTOM ============
   useEffect(() => {
     if (wasAtBottomRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [messages, isLoading]);
 
@@ -168,6 +168,9 @@ export default function HomeAIAssistant() {
       const updatedMessages = [...messages, userMessage];
       setMessages(updatedMessages);
       setInput('');
+
+      // Force scroll to bottom on send
+      wasAtBottomRef.current = true;
 
       requestAnimationFrame(() => {
         inputRef.current?.focus();
@@ -236,64 +239,72 @@ export default function HomeAIAssistant() {
         )}
       </div>
 
-      {/* CHAT MESSAGES — with visible scrollbar */}
+      {/* CHAT MESSAGES — FIXED SCROLLABLE AREA */}
       {messages.length > 0 && (
-        <div
-          ref={chatContainerRef}
-          onScroll={handleScroll}
-          className="
-            mb-4 max-h-[340px] overflow-y-auto space-y-2.5 px-1 py-1
-            chat-scrollbar
-          "
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'rgba(139,92,246,0.4) transparent',
-          }}
-        >
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex gap-2 ${
-                msg.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              {msg.role === 'assistant' && (
+        <div className="relative mb-4 shrink-0">
+          <div
+            ref={chatContainerRef}
+            onScroll={handleScroll}
+            className="chat-scrollbar overflow-y-auto space-y-2.5 px-3 py-3 pr-4 rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-black/20"
+            style={{
+              height: '340px',
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(139,92,246,0.6) rgba(0,0,0,0.1)',
+            }}
+          >
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex gap-2 ${
+                  msg.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                {msg.role === 'assistant' && (
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <Sparkles className="w-3.5 h-3.5 text-white" />
+                  </div>
+                )}
+                <div
+                  className={`px-3 py-2 rounded-xl text-[12px] leading-relaxed max-w-[85%] whitespace-pre-wrap break-words ${
+                    msg.role === 'user'
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-white dark:bg-white/[0.05] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10'
+                  }`}
+                >
+                  {msg.content}
+                </div>
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="flex gap-2 justify-start">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shrink-0 mt-0.5">
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
-              )}
-              <div
-                className={`px-3 py-2 rounded-xl text-[12px] leading-relaxed max-w-[85%] whitespace-pre-wrap break-words ${
-                  msg.role === 'user'
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-gray-100 dark:bg-white/[0.05] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10'
-                }`}
-              >
-                {msg.content}
+                <div className="px-3 py-2 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/10 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
               </div>
-            </div>
-          ))}
+            )}
 
-          {isLoading && (
-            <div className="flex gap-2 justify-start">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shrink-0 mt-0.5">
-                <Sparkles className="w-3.5 h-3.5 text-white" />
-              </div>
-              <div className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-white/[0.05] border border-gray-200 dark:border-white/10 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
-          )}
+            <div ref={messagesEndRef} />
+          </div>
 
-          <div ref={messagesEndRef} />
+          {/* Scroll hint — top fade */}
+          <div
+            className="absolute top-0 left-0 right-0 h-6 pointer-events-none rounded-t-lg"
+            style={{
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.15), transparent)',
+            }}
+          />
         </div>
       )}
 
       {/* TOOL MATCH INDICATOR */}
       {matchInfo && (
-        <div className="mb-4 px-3.5 py-3 rounded-xl bg-purple-500/10 border border-purple-500/30">
+        <div className="mb-4 px-3.5 py-3 rounded-xl bg-purple-500/10 border border-purple-500/30 shrink-0">
           <p className="text-[11px] font-semibold text-purple-600 dark:text-purple-300 mb-1">
             ✨ Opening {matchInfo.toolName}...
           </p>
@@ -303,7 +314,7 @@ export default function HomeAIAssistant() {
         </div>
       )}
 
-      {/* INPUT BOX — FIXED CURSOR CENTERED */}
+      {/* INPUT BOX */}
       <div className="relative mb-4 shrink-0">
         <div className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] pl-3 pr-2 py-1 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all">
           <MessageSquare className="w-4 h-4 text-gray-400 shrink-0" />
@@ -361,17 +372,21 @@ export default function HomeAIAssistant() {
       {/* SCROLLBAR STYLING */}
       <style>{`
         .chat-scrollbar::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         .chat-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
+          background: rgba(0, 0, 0, 0.05);
+          border-radius: 4px;
         }
         .chat-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(139, 92, 246, 0.4);
-          border-radius: 3px;
+          background: rgba(139, 92, 246, 0.6);
+          border-radius: 4px;
+          border: 2px solid transparent;
+          background-clip: padding-box;
         }
         .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(139, 92, 246, 0.7);
+          background: rgba(139, 92, 246, 0.9);
+          background-clip: padding-box;
         }
       `}</style>
     </div>
