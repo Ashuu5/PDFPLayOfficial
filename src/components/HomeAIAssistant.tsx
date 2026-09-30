@@ -1,5 +1,5 @@
 // ============================================================
-// HOME AI ASSISTANT — DeepSeek-style interface
+// HOME AI ASSISTANT — ChatGPT-style interface
 // ============================================================
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -50,7 +50,7 @@ const SUGGESTIONS_POOL = [
 ];
 
 // ============================================================
-// SEPARATE COMPONENT — Suggestions (isolated re-render)
+// SUGGESTIONS COMPONENT (isolated)
 // ============================================================
 function Suggestions({
   onSelect,
@@ -112,10 +112,15 @@ export default function HomeAIAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // ============ FOCUS INPUT ON MOUNT ============
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   // ============ AUTO-SCROLL ============
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isLoading]);
 
   // ============ HANDLE SUBMIT ============
   const handleSubmit = useCallback(
@@ -123,7 +128,7 @@ export default function HomeAIAssistant() {
       const trimmed = text.trim();
       if (!trimmed || isLoading) return;
 
-      // 1. Tool match?
+      // Check if it's a tool request
       const toolMatch = findToolMatch(trimmed);
 
       if (toolMatch) {
@@ -131,11 +136,21 @@ export default function HomeAIAssistant() {
           toolName: toolMatch.toolName,
           route: toolMatch.route,
         });
-        setTimeout(() => navigate(toolMatch.route), 1000);
+        // Add user message
+        setMessages((prev) => [
+          ...prev,
+          { role: 'user', content: trimmed },
+          {
+            role: 'assistant',
+            content: `Opening ${toolMatch.toolName} for you...`,
+          },
+        ]);
+        setInput('');
+        setTimeout(() => navigate(toolMatch.route), 1200);
         return;
       }
 
-      // 2. Ask AI
+      // Ask AI
       setIsLoading(true);
       setMatchInfo(null);
 
@@ -145,7 +160,9 @@ export default function HomeAIAssistant() {
       setInput('');
 
       // Keep focus on input
-      setTimeout(() => inputRef.current?.focus(), 50);
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
 
       try {
         const aiResponse = await askAI(updatedMessages);
@@ -163,7 +180,9 @@ export default function HomeAIAssistant() {
         ]);
       } finally {
         setIsLoading(false);
-        setTimeout(() => inputRef.current?.focus(), 50);
+        requestAnimationFrame(() => {
+          inputRef.current?.focus();
+        });
       }
     },
     [messages, isLoading, navigate]
@@ -210,7 +229,7 @@ export default function HomeAIAssistant() {
 
       {/* CHAT MESSAGES */}
       {messages.length > 0 && (
-        <div className="mb-4 max-h-[320px] overflow-y-auto space-y-2.5 px-1 py-1">
+        <div className="mb-4 max-h-[340px] overflow-y-auto space-y-2.5 px-1 py-1">
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -240,8 +259,10 @@ export default function HomeAIAssistant() {
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shrink-0 mt-0.5">
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
-              <div className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-white/[0.05] border border-gray-200 dark:border-white/10">
-                <Loader2 className="w-4 h-4 text-purple-500 animate-spin" />
+              <div className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-white/[0.05] border border-gray-200 dark:border-white/10 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           )}
@@ -278,7 +299,8 @@ export default function HomeAIAssistant() {
               }
             }}
             placeholder="Ask anything..."
-            className="flex-1 bg-transparent text-[13px] text-gray-900 dark:text-white placeholder-gray-400 outline-none"
+            className="flex-1 bg-transparent text-[13px] text-gray-900 dark:text-white placeholder-gray-400 outline-none border-0 focus:outline-none focus:ring-0 focus:border-0"
+            style={{ outline: 'none', boxShadow: 'none' }}
             disabled={isLoading}
             autoComplete="off"
             autoCorrect="off"
@@ -299,7 +321,7 @@ export default function HomeAIAssistant() {
         </div>
       </div>
 
-      {/* SUGGESTIONS (isolated component — no re-render of input) */}
+      {/* SUGGESTIONS */}
       <Suggestions
         onSelect={handleSuggestionClick}
         hidden={messages.length > 0 || !!matchInfo}
