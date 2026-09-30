@@ -50,7 +50,7 @@ const SUGGESTIONS_POOL = [
 ];
 
 // ============================================================
-// SUGGESTIONS COMPONENT (isolated)
+// SUGGESTIONS COMPONENT
 // ============================================================
 function Suggestions({
   onSelect,
@@ -110,16 +110,29 @@ export default function HomeAIAssistant() {
   } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const wasAtBottomRef = useRef(true);
 
   // ============ FOCUS INPUT ON MOUNT ============
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  // ============ AUTO-SCROLL ============
+  // ============ TRACK IF USER IS AT BOTTOM OF CHAT ============
+  const handleScroll = () => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+    wasAtBottomRef.current = isAtBottom;
+  };
+
+  // ============ AUTO-SCROLL ONLY IF USER WAS AT BOTTOM ============
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (wasAtBottomRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, isLoading]);
 
   // ============ HANDLE SUBMIT ============
@@ -128,7 +141,6 @@ export default function HomeAIAssistant() {
       const trimmed = text.trim();
       if (!trimmed || isLoading) return;
 
-      // Check if it's a tool request
       const toolMatch = findToolMatch(trimmed);
 
       if (toolMatch) {
@@ -136,7 +148,6 @@ export default function HomeAIAssistant() {
           toolName: toolMatch.toolName,
           route: toolMatch.route,
         });
-        // Add user message
         setMessages((prev) => [
           ...prev,
           { role: 'user', content: trimmed },
@@ -150,7 +161,6 @@ export default function HomeAIAssistant() {
         return;
       }
 
-      // Ask AI
       setIsLoading(true);
       setMatchInfo(null);
 
@@ -159,7 +169,6 @@ export default function HomeAIAssistant() {
       setMessages(updatedMessages);
       setInput('');
 
-      // Keep focus on input
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
@@ -201,7 +210,7 @@ export default function HomeAIAssistant() {
   return (
     <div className="rounded-2xl border border-purple-500/20 bg-white/50 dark:bg-white/[0.02] backdrop-blur-sm p-5 sm:p-6 h-full flex flex-col">
       {/* HEADER */}
-      <div className="flex items-center justify-between gap-2 mb-4">
+      <div className="flex items-center justify-between gap-2 mb-4 shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
@@ -227,9 +236,20 @@ export default function HomeAIAssistant() {
         )}
       </div>
 
-      {/* CHAT MESSAGES */}
+      {/* CHAT MESSAGES — with visible scrollbar */}
       {messages.length > 0 && (
-        <div className="mb-4 max-h-[340px] overflow-y-auto space-y-2.5 px-1 py-1">
+        <div
+          ref={chatContainerRef}
+          onScroll={handleScroll}
+          className="
+            mb-4 max-h-[340px] overflow-y-auto space-y-2.5 px-1 py-1
+            chat-scrollbar
+          "
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(139,92,246,0.4) transparent',
+          }}
+        >
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -283,9 +303,9 @@ export default function HomeAIAssistant() {
         </div>
       )}
 
-      {/* INPUT BOX */}
-      <div className="relative mb-4">
-        <div className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] px-3 py-2.5 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all">
+      {/* INPUT BOX — FIXED CURSOR CENTERED */}
+      <div className="relative mb-4 shrink-0">
+        <div className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] pl-3 pr-2 py-1 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all">
           <MessageSquare className="w-4 h-4 text-gray-400 shrink-0" />
           <input
             ref={inputRef}
@@ -299,8 +319,12 @@ export default function HomeAIAssistant() {
               }
             }}
             placeholder="Ask anything..."
-            className="flex-1 bg-transparent text-[13px] text-gray-900 dark:text-white placeholder-gray-400 outline-none border-0 focus:outline-none focus:ring-0 focus:border-0"
-            style={{ outline: 'none', boxShadow: 'none' }}
+            className="flex-1 bg-transparent text-[13px] text-gray-900 dark:text-white placeholder-gray-400 py-2 outline-none border-0 focus:outline-none focus:ring-0 focus:border-0"
+            style={{
+              outline: 'none',
+              boxShadow: 'none',
+              lineHeight: '1.4',
+            }}
             disabled={isLoading}
             autoComplete="off"
             autoCorrect="off"
@@ -328,11 +352,28 @@ export default function HomeAIAssistant() {
       />
 
       {/* FOOTER HINT */}
-      <div className="mt-4 pt-3 border-t border-gray-200 dark:border-white/10">
+      <div className="mt-4 pt-3 border-t border-gray-200 dark:border-white/10 shrink-0">
         <p className="text-[10px] text-gray-500 dark:text-gray-400 text-center">
           Powered by AI · Supports all languages
         </p>
       </div>
+
+      {/* SCROLLBAR STYLING */}
+      <style>{`
+        .chat-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .chat-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .chat-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(139, 92, 246, 0.4);
+          border-radius: 3px;
+        }
+        .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(139, 92, 246, 0.7);
+        }
+      `}</style>
     </div>
   );
 }
