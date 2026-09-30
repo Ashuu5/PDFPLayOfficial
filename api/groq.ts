@@ -26,8 +26,7 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const { messages, systemPrompt, model = 'llama-3.3-70b-versatile' } = req.body;
-
+const { messages, systemPrompt, model = 'openai/gpt-oss-120b' } = req.body;
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({
         error: 'messages array is required',
