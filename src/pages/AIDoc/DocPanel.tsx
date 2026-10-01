@@ -2,7 +2,6 @@ import { useState, useRef } from 'react';
 import {
   Sparkles,
   FileText,
-  Plus,
   Loader2,
   LayoutGrid,
   Download,
@@ -10,8 +9,10 @@ import {
   X,
   Image as ImageIcon,
   File as FileIcon,
+  Plus,
+  Wand2,
 } from 'lucide-react';
-import { docTemplates, findDocTemplate } from '../../lib/docTemplates';
+import { docTemplates, findDocTemplate, type DocTemplate } from '../../lib/docTemplates';
 import { generateDocx, type UserData } from '../../lib/docEngine';
 import { extractDataFromPrompt, TEMPLATE_FIELDS } from '../../lib/aiExtractor';
 import { parseDocFile, type ParsedDoc } from '../../lib/docFileReader';
@@ -24,7 +25,7 @@ import {
 
 export default function DocPanel() {
   const [prompt, setPrompt] = useState(
-    'Draft a professional business proposal or document for my company'
+    'CV banao — Ali Khan, React Developer, ali@email.com, Karachi, 5 years experience'
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,13 +33,14 @@ export default function DocPanel() {
 
   // Uploaded files
   const [uploadedFiles, setUploadedFiles] = useState<ParsedDoc[]>([]);
+  const [showUpload, setShowUpload] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // AI design flow
+  // After generation
+  const [generatedTemplate, setGeneratedTemplate] = useState<DocTemplate | null>(null);
+  const [generatedData, setGeneratedData] = useState<UserData>({});
   const [aiDesignHTML, setAiDesignHTML] = useState<string | null>(null);
   const [isGeneratingDesign, setIsGeneratingDesign] = useState(false);
-  const [currentTemplate, setCurrentTemplate] = useState<string | null>(null);
-  const [currentUserData, setCurrentUserData] = useState<UserData>({});
 
   // ============================================================
   // FILE UPLOAD
@@ -64,12 +66,13 @@ export default function DocPanel() {
   };
 
   // ============================================================
-  // GENERATE
+  // MAIN GENERATE
   // ============================================================
   const handleGenerate = async () => {
     setError(null);
     setSuccessMessage(null);
-    setAiDesignHTML(null);
+    setGeneratedTemplate(null);
+    setGeneratedData({});
 
     if (!prompt.trim()) {
       setError('Please enter a prompt');
@@ -88,36 +91,37 @@ export default function DocPanel() {
     setIsGenerating(true);
 
     try {
-      // Build final prompt — include uploaded file text as context
+      // Include uploaded file text as context
       let finalPrompt = prompt;
 
       const docTexts = uploadedFiles
         .filter((f) => f.fileType === 'document' && f.textContent.trim())
-        .map((f) => `--- From file: ${f.fileName} ---\n${f.textContent}`)
+        .map((f) => `--- From: ${f.fileName} ---\n${f.textContent}`)
         .join('\n\n');
 
       if (docTexts) {
-        finalPrompt = `${prompt}\n\nAdditional context from uploaded files:\n${docTexts}`;
+        finalPrompt = `${prompt}\n\nAdditional context:\n${docTexts}`;
       }
 
-      // Extract data via AI
+      // AI extract data
       const data = await extractDataFromPrompt(finalPrompt, template.id);
-
-      // Merge user data + first image (if any)
       const userData: UserData = { ...(data || {}) };
 
+      // Attach first image if any
       const firstImage = uploadedFiles.find((f) => f.fileType === 'image');
       if (firstImage?.imageDataUrl) {
         userData.photo = firstImage.imageDataUrl;
       }
 
-      // Save for later use (AI Custom design)
-      setCurrentTemplate(template.id);
-      setCurrentUserData(userData);
-
       // Generate DOCX
       await generateDocx(template, userData);
-      setSuccessMessage(`${template.name} generated successfully. Check your downloads.`);
+
+      // Save for post-generation options
+      setGeneratedTemplate(template);
+      setGeneratedData(userData);
+      setSuccessMessage(
+        `✅ ${template.name} generated! Choose your download format below or try AI custom design.`
+      );
     } catch (err: any) {
       setError(err.message || 'Failed to generate document');
     } finally {
@@ -126,7 +130,56 @@ export default function DocPanel() {
   };
 
   // ============================================================
-  // DIRECT DOWNLOAD (card click — blank)
+  // DOWNLOAD DOCX AGAIN (from success panel)
+  // ============================================================
+  const handleDownloadDocx = async () => {
+    if (!generatedTemplate) return;
+    try {
+      await generateDocx(generatedTemplate, generatedData);
+      setSuccessMessage('✅ DOCX downloaded.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to download DOCX');
+    }
+  };
+
+  // ============================================================
+  // AI CUSTOM DESIGN
+  // ============================================================
+  const handleAICustomDesign = async () => {
+    if (!generatedTemplate) return;
+
+    setIsGeneratingDesign(true);
+    setError(null);
+
+    try {
+      const documentType = getDocumentTypeFromTemplate(generatedTemplate.id);
+
+      const html = await generateHTMLDesign({
+        documentType,
+        userData: generatedData,
+        styleHint: 'modern, elegant, professional, well-spaced',
+      });
+
+      if (!html) {
+        setAiDesignHTML(generateSimpleHTML(documentType, generatedData));
+      } else {
+        setAiDesignHTML(html);
+      }
+    } catch {
+      const documentType = getDocumentTypeFromTemplate(generatedTemplate.id);
+      setAiDesignHTML(generateSimpleHTML(documentType, generatedData));
+    } finally {
+      setIsGeneratingDesign(false);
+    }
+  };
+
+  const handleRegenerateDesign = async () => {
+    setAiDesignHTML(null);
+    await handleAICustomDesign();
+  };
+
+  // ============================================================
+  // DIRECT DOWNLOAD (blank template card)
   // ============================================================
   const downloadTemplate = async (templateId: string) => {
     const template = docTemplates.find((t) => t.id === templateId);
@@ -135,6 +188,7 @@ export default function DocPanel() {
     setIsGenerating(true);
     setError(null);
     setSuccessMessage(null);
+    setGeneratedTemplate(null);
 
     try {
       await generateDocx(template);
@@ -144,42 +198,6 @@ export default function DocPanel() {
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  // ============================================================
-  // AI CUSTOM DESIGN — unique AI-generated layout
-  // ============================================================
-  const handleAICustomDesign = async () => {
-    if (!currentTemplate || !currentUserData) return;
-
-    setIsGeneratingDesign(true);
-    setError(null);
-
-    try {
-      const documentType = getDocumentTypeFromTemplate(currentTemplate);
-
-      const html = await generateHTMLDesign({
-        documentType,
-        userData: currentUserData,
-        styleHint: 'modern, elegant, professional, well-spaced',
-      });
-
-      if (!html) {
-        setAiDesignHTML(generateSimpleHTML(documentType, currentUserData));
-      } else {
-        setAiDesignHTML(html);
-      }
-    } catch {
-      const documentType = getDocumentTypeFromTemplate(currentTemplate);
-      setAiDesignHTML(generateSimpleHTML(documentType, currentUserData));
-    } finally {
-      setIsGeneratingDesign(false);
-    }
-  };
-
-  const handleRegenerateDesign = async () => {
-    setAiDesignHTML(null);
-    await handleAICustomDesign();
   };
 
   // ============================================================
@@ -227,17 +245,32 @@ export default function DocPanel() {
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">AI Doc</h2>
       </div>
 
-      {/* PROMPT BOX */}
-      <div className="relative mb-4">
-        <div className="flex items-start gap-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] p-3.5">
-          <Sparkles className="w-4 h-4 text-purple-500 dark:text-purple-400 mt-1 shrink-0" />
+      {/* PROMPT BOX WITH + BUTTON */}
+      <div className="mb-4">
+        <div className="flex items-end gap-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] p-3.5">
+          <Sparkles className="w-4 h-4 text-purple-500 dark:text-purple-400 mb-2.5 shrink-0" />
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={2}
             className="flex-1 bg-transparent text-[13px] text-gray-700 dark:text-gray-300 placeholder-gray-400 resize-none outline-none leading-snug"
-            placeholder="Try: 'CV banao — Ali Khan, React Developer, ali@email.com, Karachi, 5 years experience'"
+            placeholder="Describe your document with details (name, email, requirements)..."
           />
+
+          {/* + Upload button */}
+          <button
+            onClick={() => setShowUpload(!showUpload)}
+            className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all shrink-0 ${
+              showUpload
+                ? 'bg-purple-500 text-white'
+                : 'bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border border-purple-400/30'
+            }`}
+            title="Upload file"
+          >
+            <Plus className={`w-4 h-4 transition-transform ${showUpload ? 'rotate-45' : ''}`} />
+          </button>
+
+          {/* Generate button */}
           <button
             onClick={handleGenerate}
             disabled={isGenerating}
@@ -249,77 +282,70 @@ export default function DocPanel() {
                 Generating...
               </>
             ) : (
-              <>
-                Generate
-                <Plus className="w-3.5 h-3.5" />
-              </>
+              'Generate'
             )}
           </button>
         </div>
-      </div>
 
-      {/* UPLOAD BOX */}
-      <div
-        className="rounded-xl border-2 border-dashed border-purple-400/40 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-500/[0.03] p-5 mb-4 cursor-pointer hover:border-purple-400/70 transition-all"
-        onClick={() => fileInputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          handleFileUpload(e.dataTransfer.files);
-        }}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".docx,.doc,.pdf,.txt,image/*"
-          multiple
-          className="hidden"
-          onChange={(e) => handleFileUpload(e.target.files)}
-        />
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-            <Upload className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-          </div>
-          <div>
-            <p className="text-[13px] font-semibold text-gray-900 dark:text-white">
-              Upload your CV, documents, or photo
-            </p>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-              Drag & drop .docx, .pdf, .jpg, .png here · or{' '}
-              <span className="text-purple-500 dark:text-purple-400 underline">
-                Browse files
-              </span>
-            </p>
-          </div>
-        </div>
-
-        {/* Uploaded files list */}
-        {uploadedFiles.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-purple-500/20 space-y-1.5">
-            {uploadedFiles.map((file, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20"
-              >
-                {file.fileType === 'image' ? (
-                  <ImageIcon className="w-3.5 h-3.5 text-purple-500 shrink-0" />
-                ) : (
-                  <FileIcon className="w-3.5 h-3.5 text-purple-500 shrink-0" />
-                )}
-                <span className="text-[11px] text-gray-700 dark:text-gray-300 flex-1 truncate">
-                  {file.fileName}
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeFile(i);
-                  }}
-                  className="p-0.5 rounded text-gray-400 hover:text-red-500 transition-colors"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
+        {/* Upload area — collapsible */}
+        {showUpload && (
+          <div className="mt-2 rounded-xl border-2 border-dashed border-purple-400/40 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-500/[0.03] p-4">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".docx,.doc,.pdf,.txt,image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => handleFileUpload(e.target.files)}
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                handleFileUpload(e.dataTransfer.files);
+              }}
+              className="flex items-center gap-3 cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                <Upload className="w-4 h-4 text-purple-500" />
               </div>
-            ))}
+              <div>
+                <p className="text-[12px] font-semibold text-gray-900 dark:text-white">
+                  Upload CV, document, or photo
+                </p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                  Drag & drop .docx, .pdf, .jpg, .png · or browse
+                </p>
+              </div>
+            </div>
+
+            {/* Uploaded files chips */}
+            {uploadedFiles.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-purple-500/20 space-y-1.5">
+                {uploadedFiles.map((file, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20"
+                  >
+                    {file.fileType === 'image' ? (
+                      <ImageIcon className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                    ) : (
+                      <FileIcon className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                    )}
+                    <span className="text-[11px] text-gray-700 dark:text-gray-300 flex-1 truncate">
+                      {file.fileName}
+                    </span>
+                    <button
+                      onClick={removeFile.bind(null, i)}
+                      className="p-0.5 rounded text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -331,35 +357,53 @@ export default function DocPanel() {
         </div>
       )}
 
-      {/* SUCCESS + AI CUSTOM BUTTON */}
-      {successMessage && (
-        <div className="mb-4 rounded-xl overflow-hidden border border-emerald-500/30">
+      {/* SUCCESS PANEL — 4 options */}
+      {successMessage && generatedTemplate && (
+        <div className="mb-5 rounded-xl overflow-hidden border border-emerald-500/30">
           <div className="px-3.5 py-2.5 bg-emerald-500/10">
             <p className="text-[12px] text-emerald-700 dark:text-emerald-300">
-              ✅ {successMessage}
+              {successMessage}
             </p>
           </div>
-          <div className="px-3.5 py-3 bg-emerald-500/[0.05] border-t border-emerald-500/20">
-            <p className="text-[11px] text-gray-600 dark:text-gray-400 mb-2.5">
-              Want a <strong>unique AI-designed version</strong>? Or try another template from below.
+
+          <div className="px-3.5 py-4 bg-emerald-500/[0.05] border-t border-emerald-500/20">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-3">
+              Download Options
             </p>
-            <button
-              onClick={handleAICustomDesign}
-              disabled={isGeneratingDesign}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white text-[12px] font-bold hover:scale-[1.02] transition-all disabled:opacity-60"
-            >
-              {isGeneratingDesign ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  AI is designing...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Generate AI Custom Design
-                </>
-              )}
-            </button>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {/* DOCX */}
+              <button
+                onClick={handleDownloadDocx}
+                className="flex items-center justify-center gap-2 px-3 py-3 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 text-white text-[11px] font-bold hover:scale-[1.02] transition-all shadow-[0_8px_20px_-6px_rgba(59,130,246,0.5)]"
+              >
+                <Download className="w-4 h-4" />
+                DOCX (Editable)
+              </button>
+
+              {/* AI Custom — PDF + PNG */}
+              <button
+                onClick={handleAICustomDesign}
+                disabled={isGeneratingDesign}
+                className="flex items-center justify-center gap-2 px-3 py-3 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 text-white text-[11px] font-bold hover:scale-[1.02] transition-all shadow-[0_8px_20px_-6px_rgba(139,92,246,0.5)] disabled:opacity-60 col-span-1 sm:col-span-2"
+              >
+                {isGeneratingDesign ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    AI Designing...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="w-4 h-4" />
+                    AI Custom Design (PDF / PNG)
+                  </>
+                )}
+              </button>
+            </div>
+
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2.5 text-center">
+              DOCX = editable in Word · AI Custom = perfect design for PDF / PNG
+            </p>
           </div>
         </div>
       )}
@@ -377,7 +421,7 @@ export default function DocPanel() {
             </span>
           </div>
           <span className="text-[10px] text-gray-500 dark:text-gray-400 italic">
-            Click any template to download
+            Click to download blank version
           </span>
         </div>
 
@@ -428,17 +472,17 @@ export default function DocPanel() {
       <div className="mt-5 px-3.5 py-2.5 rounded-lg bg-purple-500/[0.06] border border-purple-500/20">
         <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed">
           <span className="font-bold text-purple-500 dark:text-purple-400">💡 Tip:</span>{' '}
-          Add your details in the prompt — AI fills them automatically. Upload your old CV or a photo for AI to use. After download, you can request an AI custom design.
+          Add your details in the prompt. Use the <strong>+</strong> button to upload your old CV, documents, or photo — AI will use them.
         </p>
       </div>
 
       {/* AI DESIGN MODAL */}
-      {aiDesignHTML && currentTemplate && (
+      {aiDesignHTML && generatedTemplate && (
         <AIDesignRenderer
           html={aiDesignHTML}
-          documentType={getDocumentTypeFromTemplate(currentTemplate)}
-          userData={currentUserData}
-          template={docTemplates.find((t) => t.id === currentTemplate)!}
+          documentType={getDocumentTypeFromTemplate(generatedTemplate.id)}
+          userData={generatedData}
+          template={generatedTemplate}
           onClose={() => setAiDesignHTML(null)}
           onRegenerate={handleRegenerateDesign}
           isRegenerating={isGeneratingDesign}
