@@ -1,12 +1,11 @@
 // ============================================================
-// AI EXTRACTOR — User ki short details se POORA professional content
+// AI EXTRACTOR — Medium-length professional content
 // ============================================================
 
 export interface ExtractedData {
   [key: string]: string;
 }
 
-// Har template ke liye expected fields
 export const TEMPLATE_FIELDS: Record<string, string[]> = {
   'ats-resume': [
     'fullName', 'jobTitle', 'email', 'phone', 'location',
@@ -158,7 +157,7 @@ export const TEMPLATE_FIELDS: Record<string, string[]> = {
 };
 
 // ============================================================
-// MAIN EXTRACTION — User prompt se POORA content generate karo
+// MAIN EXTRACTION
 // ============================================================
 export async function extractDataFromPrompt(
   userPrompt: string,
@@ -178,33 +177,23 @@ export async function extractDataFromPrompt(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: [
-          { role: 'user', content: userPrompt },
-        ],
+        messages: [{ role: 'user', content: userPrompt }],
         systemPrompt,
         model: 'openai/gpt-oss-120b',
-        maxTokens: 3000,
+        maxTokens: 2000,
       }),
     });
 
-    if (!response.ok) {
-      console.error('Groq API error');
-      return null;
-    }
+    if (!response.ok) return null;
 
     const data = await response.json();
     const content = data?.choices?.[0]?.message?.content;
     if (!content) return null;
 
-    // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error('No JSON found in response:', content);
-      return null;
-    }
+    if (!jsonMatch) return null;
 
-    const parsed = JSON.parse(jsonMatch[0]);
-    return parsed;
+    return JSON.parse(jsonMatch[0]);
   } catch (error) {
     console.error('Extraction failed:', error);
     return null;
@@ -212,7 +201,7 @@ export async function extractDataFromPrompt(
 }
 
 // ============================================================
-// SYSTEM PROMPT BUILDER — Different types ke liye alag prompt
+// SYSTEM PROMPT — MEDIUM length content
 // ============================================================
 function buildSystemPrompt(
   templateId: string,
@@ -225,57 +214,47 @@ function buildSystemPrompt(
 CRITICAL RULES:
 1. Return ONLY a valid JSON object. No markdown, no code fences, no explanation.
 2. Use EXACTLY these field names: ${fields.join(', ')}
-3. Fill EVERY field with professional, realistic content.
-4. If user provided a value, USE IT EXACTLY as given.
-5. If user did NOT provide a value, GENERATE a professional, realistic value based on context.
-6. NEVER leave fields empty. NEVER use placeholders like "[Your Name]" or "{{name}}".
-7. Output must be valid JSON parseable by JSON.parse().
+3. If user provided a value, USE IT EXACTLY.
+4. If user did NOT provide a value, GENERATE a short realistic value.
+5. NEVER leave fields empty.
+6. Output must be valid JSON parseable by JSON.parse().
 `;
 
   if (isResume) {
     return `${baseRules}
 
-You are an expert CV/Resume writer with 15+ years of experience. Your job: take the user's SHORT input and generate a COMPLETE, PROFESSIONAL, WORLD-CLASS resume.
+You are an expert CV writer. Take the user's SHORT input and generate a CONCISE, PROFESSIONAL resume. Keep content MEDIUM length — not too short, not too long.
 
-═══ HOW TO GENERATE CONTENT ═══
+═══ CONTENT LENGTH GUIDE ═══
 
-USER PROVIDES: name, job title, years of experience, location, maybe email/phone.
-
-YOU MUST GENERATE:
-• summary: 4-5 line professional summary in THIRD PERSON. Highlight years of experience, key skills, and value proposition. Make it compelling.
+• summary: EXACTLY 2 lines. Concise, professional, focused on years + key skills.
   Example for "React Developer, 5 years":
-  "Results-driven React Developer with 5+ years of experience building scalable, high-performance web applications. Expert in modern JavaScript frameworks, state management, and responsive UI design. Proven track record of leading development teams and delivering projects on time. Passionate about clean code, performance optimization, and user-centric design."
+  "React Developer with 5+ years of experience building scalable web applications. Skilled in React, TypeScript, and modern JavaScript frameworks with a proven track record of delivering high-quality projects."
 
-• experience: 3-4 detailed job entries. For EACH entry use this format:
-  "Senior [Job Title] | [Realistic Company Name] | [Year Range]\\n• Responsibility with action verb and measurable result\\n• Responsibility with action verb and measurable result\\n• Responsibility with action verb and measurable result\\n• Responsibility with action verb and measurable result"
-  
-  Use REALISTIC company names (like "TechCorp Solutions", "Digital Innovations Inc.", "GlobalSoft Systems") — NEVER Google/Facebook/Microsoft unless user mentioned them.
-  
-  Each bullet should:
-  - Start with strong action verb (Led, Developed, Architected, Implemented, Reduced, Improved, Managed, Designed)
-  - Include specific numbers (%, $, #)
-  - Show impact and results
+• skills: 6-8 skills ONLY. Comma-separated, most relevant first.
+  Example: "React, JavaScript, TypeScript, Redux, Node.js, HTML5, CSS3, Git"
 
-• skills: comma-separated list of 12-15 relevant technical and soft skills for the job title.
-  For React Developer: "React, JavaScript (ES6+), TypeScript, Redux, React Hooks, Next.js, Node.js, REST APIs, GraphQL, HTML5, CSS3, Tailwind CSS, Git, Jest, Agile/Scrum, Team Leadership"
+• experience: 1-2 job entries ONLY. Each entry format:
+  "[Job Title] | [Company Name] | [Year Range]\\n• Responsibility (1 line with action verb + result)\\n• Responsibility (1 line with action verb + result)\\n• Responsibility (1 line with action verb + result)"
 
-• education: 1-2 entries in this format:
-  "Bachelor of Science in [Relevant Field] | [Realistic University Name] | [Year Range]\\nGPA: [Realistic GPA]/4.0 | [Honor/Achievement]"
+  Use realistic company names. Each bullet = 1 line, concise, with numbers.
 
-• certifications: comma-separated list of 3-4 relevant certifications.
-  For React Developer: "AWS Certified Developer - Associate (2023), Meta Front-End Developer Professional Certificate (2022), MongoDB Certified Developer (2021)"
+• education: 1 entry ONLY. Format:
+  "[Degree] | [University] | [Year Range]\\nGPA: X.X/4.0 | [Honor]"
 
-• projects: 2 detailed project entries in this format:
-  "Project Name (Year)\\nDescription of what it does and technologies used with measurable impact."
+• certifications: 2-3 certifications ONLY.
 
-• linkedin: A realistic LinkedIn URL like "linkedin.com/in/[lowercase-name]"
+• achievements (for awards field): 2 achievements ONLY.
 
-═══ STYLE GUIDE ═══
-- Professional tone, third person
-- Action verbs, quantified results
-- No fluff, no exaggeration
-- ATS-friendly keywords
-- Realistic companies and dates
+• projects: 1 project ONLY.
+
+• linkedin: "linkedin.com/in/[lowercase-name]"
+
+═══ STYLE ═══
+- Concise, punchy
+- Action verbs (Led, Built, Improved, Managed)
+- Realistic companies
+- No fluff
 
 Return ONLY the JSON.`;
   }
@@ -285,17 +264,10 @@ Return ONLY the JSON.`;
 
 You are an accountant. Generate a professional invoice.
 
-USER PROVIDES: company name, client name, items/services, prices.
-
-YOU MUST GENERATE:
-• Realistic invoice number (e.g., "INV-2025-042")
-• Today's date for "date"
-• 30 days from today for "dueDate"
-• "Net 30" for paymentTerms
-• 5 line items with descriptions matching the business context
-• Calculate subtotal, tax (10%), and total
-• Payment details (bank name, account number, SWIFT)
-• Professional notes
+• Realistic invoice number
+• Today's date and 30-day due date
+• 3-5 line items matching the business context
+• Calculate subtotal, tax (10%), total
 
 Return ONLY the JSON.`;
   }
@@ -303,25 +275,19 @@ Return ONLY the JSON.`;
   if (isSchool) {
     return `${baseRules}
 
-You are a school administrator. Generate a professional school document.
+You are a school administrator. Generate a professional school document with realistic details.
 
-USER PROVIDES: student name, class, school name, etc.
-
-YOU MUST GENERATE:
 • Realistic roll numbers, admission numbers
 • Realistic dates
-• Professional remarks and comments
-• Complete school details
-• Realistic grades, marks, percentages
+• Professional comments
+• Complete school info
 
 Return ONLY the JSON.`;
   }
 
   return `${baseRules}
 
-You are a professional document writer. Generate realistic, professional content for the given document type.
-
-Fill every field with authentic, appropriate content based on the user's input. If user didn't specify, generate realistic values.
+Generate realistic, professional content for the document. Keep it concise and appropriate.
 
 Return ONLY the JSON.`;
 }
