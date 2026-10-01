@@ -113,14 +113,11 @@ export default function DocPanel() {
         userData.photo = firstImage.imageDataUrl;
       }
 
-      // Generate DOCX (auto-download)
-      await generateDocx(template, userData);
-
-      // Save for PDF option
+            // Do NOT auto-download. Just save for user to choose format.
       setGeneratedTemplate(template);
       setGeneratedData(userData);
       setSuccessMessage(
-        `✅ ${template.name} DOCX downloaded! You can also download a PDF version.`
+        `✅ ${template.name} is ready! Choose your download format below.`
       );
     } catch (err: any) {
       setError(err.message || 'Failed to generate document');
