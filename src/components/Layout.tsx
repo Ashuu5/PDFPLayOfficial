@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, Sun, Moon, Sparkles, FileSpreadsheet, FileText } from 'lucide-react';
+import { Menu, X, ChevronDown, Sun, Moon, Sparkles, FileSpreadsheet } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -286,20 +286,12 @@ export default function Layout({ children }: LayoutProps) {
             </Link>
 
             <div className="hidden md:flex items-center gap-0.5">
-              {/* ✨ AI EXCEL BUBBLE — FIRST */}
+              {/* ✨ AI EXCEL BUBBLE */}
               <AIBubbleButton
                 to="/ai-excel"
                 label="AI Excel"
                 icon={FileSpreadsheet}
                 isActive={isActive('/ai-excel')}
-              />
-
-              {/* ✨ AI DOC BUBBLE — SECOND */}
-              <AIBubbleButton
-                to="/ai-doc"
-                label="AI Doc"
-                icon={FileText}
-                isActive={isActive('/ai-doc')}
               />
 
               <NavLink to="/merge-pdf" label="Merge" isActive={isActive('/merge-pdf')} />
@@ -522,7 +514,6 @@ export default function Layout({ children }: LayoutProps) {
               {[
                 { to: '/', label: 'Home' },
                 { to: '/ai-excel', label: '📊 AI Excel' },
-                { to: '/ai-doc', label: '📄 AI Doc' },
                 { to: '/merge-pdf', label: 'Merge PDF' },
                 { to: '/split-pdf', label: 'Split PDF' },
                 { to: '/compress-pdf', label: 'Compress PDF' },

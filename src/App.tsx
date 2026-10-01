@@ -27,7 +27,6 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Contact from './pages/Contact';
 import AIExcel from './pages/AIExcel';
-import AIDoc from './pages/AIDoc';
 
 function App() {
   return (
@@ -61,7 +60,7 @@ function App() {
           <Route path="/crop-pdf" element={<CropPDF />} />
           <Route path="/metadata-editor" element={<MetadataEditor />} />
           <Route path="/ai-excel" element={<AIExcel />} />
-          <Route path="/ai-doc" element={<AIDoc />} />
+          
         </Routes>
       </Layout>
     </Router>
