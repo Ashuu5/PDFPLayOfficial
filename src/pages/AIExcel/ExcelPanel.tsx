@@ -7,6 +7,7 @@ import {
   FileSpreadsheet,
   X,
   Loader2,
+  Plus,
 } from 'lucide-react';
 import { parsePrompt, type ParseResult, type FormulaSlot } from '../../lib/ruleEngine';
 import { parseFile, type ParsedFile, summarizeFile } from '../../lib/fileReader';
@@ -18,6 +19,7 @@ import MissingFieldsModal from './MissingFieldsModal';
 export default function ExcelPanel() {
   const [prompt, setPrompt] = useState('');
   const [files, setFiles] = useState<ParsedFile[]>([]);
+  const [showUpload, setShowUpload] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
@@ -194,17 +196,36 @@ export default function ExcelPanel() {
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">AI Excel</h2>
       </div>
 
-      {/* PROMPT BOX */}
-      <div className="relative mb-4">
-        <div className="flex items-start gap-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] p-3.5">
-          <Sparkles className="w-4 h-4 text-purple-500 dark:text-purple-400 mt-1 shrink-0" />
+      {/* PROMPT BOX WITH + BUTTON */}
+      <div className="mb-4">
+        <div className="flex items-end gap-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] p-3.5">
+          <Sparkles className="w-4 h-4 text-purple-500 dark:text-purple-400 mb-2.5 shrink-0" />
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={2}
             className="flex-1 bg-transparent text-[13px] text-gray-700 dark:text-gray-300 placeholder-gray-400 resize-none outline-none leading-snug"
-            placeholder="Describe what Excel file you want..."
+            placeholder="Describe what Excel file you want, or upload files to edit..."
           />
+
+          {/* + Upload button */}
+          <button
+            onClick={() => setShowUpload(!showUpload)}
+            className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all shrink-0 ${
+              showUpload
+                ? 'bg-purple-500 text-white'
+                : 'bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border border-purple-400/30'
+            }`}
+            title="Upload file"
+          >
+            <Plus
+              className={`w-4 h-4 transition-transform ${
+                showUpload ? 'rotate-45' : ''
+              }`}
+            />
+          </button>
+
+          {/* Generate button */}
           <button
             onClick={handleGenerate}
             disabled={isGenerating}
@@ -223,66 +244,62 @@ export default function ExcelPanel() {
             )}
           </button>
         </div>
-      </div>
 
-      {/* UPLOAD BOX */}
-      <div
-        className="rounded-xl border-2 border-dashed border-purple-400/40 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-500/[0.03] p-5 mb-4 cursor-pointer hover:border-purple-400/70 transition-all"
-        onClick={() => fileInputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          handleFileUpload(e.dataTransfer.files);
-        }}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".xlsx,.xls,.csv"
-          multiple
-          className="hidden"
-          onChange={(e) => handleFileUpload(e.target.files)}
-        />
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-            <Upload className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-          </div>
-          <div>
-            <p className="text-[13px] font-semibold text-gray-900 dark:text-white">
-              Upload file for VLOOKUP / XLOOKUP
-            </p>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-              Drag & drop .xlsx or .csv file here · or{' '}
-              <span className="text-purple-500 dark:text-purple-400 underline">
-                Browse files
-              </span>
-            </p>
-          </div>
-        </div>
-
-        {/* Uploaded files */}
-        {files.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-purple-500/20 space-y-1.5">
-            {files.map((file, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-purple-500 shrink-0" />
-                <span className="text-[11px] text-gray-700 dark:text-gray-300 flex-1 truncate">
-                  {summarizeFile(file)}
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeFile(i);
-                  }}
-                  className="p-0.5 rounded text-gray-400 hover:text-red-500 transition-colors"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
+        {/* Upload area — collapsible */}
+        {showUpload && (
+          <div className="mt-2 rounded-xl border-2 border-dashed border-purple-400/40 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-500/[0.03] p-4">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              multiple
+              className="hidden"
+              onChange={(e) => handleFileUpload(e.target.files)}
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                handleFileUpload(e.dataTransfer.files);
+              }}
+              className="flex items-center gap-3 cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                <Upload className="w-4 h-4 text-purple-500" />
               </div>
-            ))}
+              <div>
+                <p className="text-[12px] font-semibold text-gray-900 dark:text-white">
+                  Upload Excel or CSV file
+                </p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                  Drag & drop .xlsx, .xls, .csv · or browse
+                </p>
+              </div>
+            </div>
+
+            {/* Uploaded files chips */}
+            {files.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-purple-500/20 space-y-1.5">
+                {files.map((file, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20"
+                  >
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                    <span className="text-[11px] text-gray-700 dark:text-gray-300 flex-1 truncate">
+                      {summarizeFile(file)}
+                    </span>
+                    <button
+                      onClick={removeFile.bind(null, i)}
+                      className="p-0.5 rounded text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
