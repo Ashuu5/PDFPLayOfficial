@@ -10,24 +10,26 @@ import {
   Image as ImageIcon,
   File as FileIcon,
   Plus,
-  Wand2,
+  FileDown,
 } from 'lucide-react';
 import { docTemplates, findDocTemplate, type DocTemplate } from '../../lib/docTemplates';
 import { generateDocx, type UserData } from '../../lib/docEngine';
 import { extractDataFromPrompt, TEMPLATE_FIELDS } from '../../lib/aiExtractor';
 import { parseDocFile, type ParsedDoc } from '../../lib/docFileReader';
-import AIDesignRenderer from '../../components/AIDesignRenderer';
 import {
   generateHTMLDesign,
   generateSimpleHTML,
   getDocumentTypeFromTemplate,
 } from '../../lib/aiDesignGenerator';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 export default function DocPanel() {
   const [prompt, setPrompt] = useState(
     'CV banao — Ali Khan, React Developer, ali@email.com, Karachi, 5 years experience'
   );
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -39,8 +41,6 @@ export default function DocPanel() {
   // After generation
   const [generatedTemplate, setGeneratedTemplate] = useState<DocTemplate | null>(null);
   const [generatedData, setGeneratedData] = useState<UserData>({});
-  const [aiDesignHTML, setAiDesignHTML] = useState<string | null>(null);
-  const [isGeneratingDesign, setIsGeneratingDesign] = useState(false);
 
   // ============================================================
   // FILE UPLOAD
@@ -66,7 +66,7 @@ export default function DocPanel() {
   };
 
   // ============================================================
-  // MAIN GENERATE
+  // MAIN GENERATE — Extract data + generate DOCX auto
   // ============================================================
   const handleGenerate = async () => {
     setError(null);
@@ -113,14 +113,14 @@ export default function DocPanel() {
         userData.photo = firstImage.imageDataUrl;
       }
 
-      // Generate DOCX
+      // Generate DOCX (auto-download)
       await generateDocx(template, userData);
 
-      // Save for post-generation options
+      // Save for PDF option
       setGeneratedTemplate(template);
       setGeneratedData(userData);
       setSuccessMessage(
-        `✅ ${template.name} generated! Choose your download format below or try AI custom design.`
+        `✅ ${template.name} DOCX downloaded! You can also download a PDF version.`
       );
     } catch (err: any) {
       setError(err.message || 'Failed to generate document');
@@ -136,46 +136,93 @@ export default function DocPanel() {
     if (!generatedTemplate) return;
     try {
       await generateDocx(generatedTemplate, generatedData);
-      setSuccessMessage('✅ DOCX downloaded.');
+      setSuccessMessage('✅ DOCX downloaded again.');
     } catch (err: any) {
       setError(err.message || 'Failed to download DOCX');
     }
   };
 
   // ============================================================
-  // AI CUSTOM DESIGN
+  // DOWNLOAD PDF — AI HTML se peeche se banaye
   // ============================================================
-  const handleAICustomDesign = async () => {
+  const handleDownloadPDF = async () => {
     if (!generatedTemplate) return;
 
-    setIsGeneratingDesign(true);
+    setIsGeneratingPDF(true);
     setError(null);
 
     try {
       const documentType = getDocumentTypeFromTemplate(generatedTemplate.id);
 
-      const html = await generateHTMLDesign({
+      // Generate HTML via AI
+      let html = await generateHTMLDesign({
         documentType,
         userData: generatedData,
         styleHint: 'modern, elegant, professional, well-spaced',
       });
 
       if (!html) {
-        setAiDesignHTML(generateSimpleHTML(documentType, generatedData));
-      } else {
-        setAiDesignHTML(html);
+        html = generateSimpleHTML(documentType, generatedData);
       }
-    } catch {
-      const documentType = getDocumentTypeFromTemplate(generatedTemplate.id);
-      setAiDesignHTML(generateSimpleHTML(documentType, generatedData));
-    } finally {
-      setIsGeneratingDesign(false);
-    }
-  };
 
-  const handleRegenerateDesign = async () => {
-    setAiDesignHTML(null);
-    await handleAICustomDesign();
+      // Render HTML in hidden container
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '210mm';
+      container.style.minHeight = '297mm';
+      container.style.padding = '0';
+      container.style.background = '#ffffff';
+      container.style.fontFamily = 'Arial, Helvetica, sans-serif';
+      container.innerHTML = html;
+      document.body.appendChild(container);
+
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Capture canvas
+      const canvas = await html2canvas(container, {
+        scale: 3,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+      });
+
+      document.body.removeChild(container);
+
+      // Generate PDF (A4)
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+      heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      pdf.save(`${documentType}_${Date.now()}.pdf`);
+      setSuccessMessage('✅ PDF downloaded (perfect design).');
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate PDF');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   // ============================================================
@@ -357,7 +404,7 @@ export default function DocPanel() {
         </div>
       )}
 
-      {/* SUCCESS PANEL — 4 options */}
+      {/* SUCCESS PANEL — 2 options: DOCX + PDF */}
       {successMessage && generatedTemplate && (
         <div className="mb-5 rounded-xl overflow-hidden border border-emerald-500/30">
           <div className="px-3.5 py-2.5 bg-emerald-500/10">
@@ -368,41 +415,43 @@ export default function DocPanel() {
 
           <div className="px-3.5 py-4 bg-emerald-500/[0.05] border-t border-emerald-500/20">
             <p className="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-3">
-              Download Options
+              Choose Your Format
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {/* DOCX */}
               <button
                 onClick={handleDownloadDocx}
-                className="flex items-center justify-center gap-2 px-3 py-3 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 text-white text-[11px] font-bold hover:scale-[1.02] transition-all shadow-[0_8px_20px_-6px_rgba(59,130,246,0.5)]"
+                className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 text-white text-[12px] font-bold hover:scale-[1.02] transition-all shadow-[0_8px_20px_-6px_rgba(59,130,246,0.5)]"
               >
-                <Download className="w-4 h-4" />
-                DOCX (Editable)
+                <FileDown className="w-4 h-4" />
+                Download DOCX
+                <span className="text-[9px] opacity-80">(Editable)</span>
               </button>
 
-              {/* AI Custom — PDF + PNG */}
+              {/* PDF */}
               <button
-                onClick={handleAICustomDesign}
-                disabled={isGeneratingDesign}
-                className="flex items-center justify-center gap-2 px-3 py-3 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 text-white text-[11px] font-bold hover:scale-[1.02] transition-all shadow-[0_8px_20px_-6px_rgba(139,92,246,0.5)] disabled:opacity-60 col-span-1 sm:col-span-2"
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPDF}
+                className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 text-white text-[12px] font-bold hover:scale-[1.02] transition-all shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)] disabled:opacity-60"
               >
-                {isGeneratingDesign ? (
+                {isGeneratingPDF ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    AI Designing...
+                    Generating PDF...
                   </>
                 ) : (
                   <>
-                    <Wand2 className="w-4 h-4" />
-                    AI Custom Design (PDF / PNG)
+                    <Download className="w-4 h-4" />
+                    Download PDF
+                    <span className="text-[9px] opacity-80">(Perfect Design)</span>
                   </>
                 )}
               </button>
             </div>
 
             <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2.5 text-center">
-              DOCX = editable in Word · AI Custom = perfect design for PDF / PNG
+              DOCX = Editable in Word · PDF = Print-ready, exact design
             </p>
           </div>
         </div>
@@ -472,22 +521,9 @@ export default function DocPanel() {
       <div className="mt-5 px-3.5 py-2.5 rounded-lg bg-purple-500/[0.06] border border-purple-500/20">
         <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed">
           <span className="font-bold text-purple-500 dark:text-purple-400">💡 Tip:</span>{' '}
-          Add your details in the prompt. Use the <strong>+</strong> button to upload your old CV, documents, or photo — AI will use them.
+          Add your details in the prompt. Use the <strong>+</strong> button to upload your old CV, documents, or photo. After generating, choose DOCX (editable) or PDF (perfect design).
         </p>
       </div>
-
-      {/* AI DESIGN MODAL */}
-      {aiDesignHTML && generatedTemplate && (
-        <AIDesignRenderer
-          html={aiDesignHTML}
-          documentType={getDocumentTypeFromTemplate(generatedTemplate.id)}
-          userData={generatedData}
-          template={generatedTemplate}
-          onClose={() => setAiDesignHTML(null)}
-          onRegenerate={handleRegenerateDesign}
-          isRegenerating={isGeneratingDesign}
-        />
-      )}
     </div>
   );
 }
