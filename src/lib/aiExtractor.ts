@@ -1,5 +1,6 @@
 // ============================================================
 // AI EXTRACTOR — Medium-length professional content
+// Fixed JSON parsing
 // ============================================================
 
 export interface ExtractedData {
@@ -180,20 +181,98 @@ export async function extractDataFromPrompt(
         messages: [{ role: 'user', content: userPrompt }],
         systemPrompt,
         model: 'openai/gpt-oss-120b',
-        maxTokens: 2000,
+        maxTokens: 3000,
       }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error('API error:', response.status);
+      return null;
+    }
 
     const data = await response.json();
     const content = data?.choices?.[0]?.message?.content;
-    if (!content) return null;
+    if (!content) {
+      console.error('No content');
+      return null;
+    }
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
+    // ===== MULTIPLE JSON EXTRACTION PATTERNS =====
+    let parsed: any = null;
 
-    return JSON.parse(jsonMatch[0]);
+    // Pattern 1: Direct JSON parse
+    try {
+      parsed = JSON.parse(content.trim());
+    } catch {
+      // Continue to next pattern
+    }
+
+    // Pattern 2: Find { ... } object in text
+    if (!parsed) {
+      const jsonMatches = content.match(/\{[\s\S]*?\}/g);
+      if (jsonMatches && jsonMatches.length > 0) {
+        const sorted = [...jsonMatches].sort((a, b) => b.length - a.length);
+        for (const match of sorted) {
+          try {
+            const attempt = JSON.parse(match);
+            if (attempt && typeof attempt === 'object' && Object.keys(attempt).length > 0) {
+              parsed = attempt;
+              break;
+            }
+          } catch {
+            continue;
+          }
+        }
+      }
+    }
+
+    // Pattern 3: key = "value" format (from AI explanations)
+    if (!parsed) {
+      const kvPattern = /(\w+)\s*[:=]\s*"([^"]+)"/g;
+      const kvMatches = [...content.matchAll(kvPattern)];
+      if (kvMatches.length > 0) {
+        const temp: any = {};
+        kvMatches.forEach((m) => {
+          temp[m[1]] = m[2];
+        });
+        if (Object.keys(temp).length > 0) {
+          parsed = temp;
+        }
+      }
+    }
+
+    // Pattern 4: key: value (without quotes)
+    if (!parsed) {
+      const kvNoQuote = /(\w+)\s*:\s*([^,\n}]+)/g;
+      const kvMatches = [...content.matchAll(kvNoQuote)];
+      if (kvMatches.length > 3) {
+        const temp: any = {};
+        kvMatches.forEach((m) => {
+          const key = m[1].trim();
+          const value = m[2].trim().replace(/^["']|["']$/g, '');
+          if (key && value && !key.includes('http')) {
+            temp[key] = value;
+          }
+        });
+        if (Object.keys(temp).length > 0) {
+          parsed = temp;
+        }
+      }
+    }
+
+    if (!parsed) {
+      console.error('Could not extract JSON from:', content.substring(0, 300));
+      return null;
+    }
+
+    // Ensure all values are strings
+    const cleaned: ExtractedData = {};
+    Object.keys(parsed).forEach((key) => {
+      const val = parsed[key];
+      cleaned[key] = typeof val === 'string' ? val : JSON.stringify(val);
+    });
+
+    return cleaned;
   } catch (error) {
     console.error('Extraction failed:', error);
     return null;
@@ -210,43 +289,39 @@ function buildSystemPrompt(
   isInvoice: boolean,
   isSchool: boolean
 ): string {
-  const baseRules = `
-CRITICAL RULES:
-1. Return ONLY a valid JSON object. No markdown, no code fences, no explanation.
-2. Use EXACTLY these field names: ${fields.join(', ')}
-3. If user provided a value, USE IT EXACTLY.
-4. If user did NOT provide a value, GENERATE a short realistic value.
-5. NEVER leave fields empty.
-6. Output must be valid JSON parseable by JSON.parse().
-`;
+  const baseRules = `CRITICAL RULES:
+1. Return ONLY a valid JSON object. Start with { and end with }.
+2. NO text, NO explanation, NO markdown before or after the JSON.
+3. Use EXACTLY these field names: ${fields.join(', ')}
+4. If user provided a value, USE IT EXACTLY.
+5. If user did NOT provide a value, GENERATE a realistic short value.
+6. NEVER leave fields empty. NEVER use placeholders like "[Name]".
+7. Output MUST be parseable by JSON.parse().
+8. All values must be strings (in double quotes).
+
+CORRECT OUTPUT EXAMPLE:
+{"fullName":"Ali Khan","jobTitle":"React Developer","email":"ali@email.com"}`;
 
   if (isResume) {
     return `${baseRules}
 
-You are an expert CV writer. Take the user's SHORT input and generate a CONCISE, PROFESSIONAL resume. Keep content MEDIUM length — not too short, not too long.
+You are an expert CV writer. Take the user's SHORT input and generate a CONCISE, PROFESSIONAL resume.
 
-═══ CONTENT LENGTH GUIDE ═══
+═══ CONTENT GUIDE ═══
 
-• summary: EXACTLY 2 lines. Concise, professional, focused on years + key skills.
-  Example for "React Developer, 5 years":
-  "React Developer with 5+ years of experience building scalable web applications. Skilled in React, TypeScript, and modern JavaScript frameworks with a proven track record of delivering high-quality projects."
+• summary: EXACTLY 2 lines. Professional, focused on years + key skills.
+  Example: "React Developer with 5+ years of experience building scalable web applications. Skilled in React, TypeScript, and modern JavaScript frameworks."
 
-• skills: 6-8 skills ONLY. Comma-separated, most relevant first.
+• skills: 6-8 skills ONLY. Comma-separated.
   Example: "React, JavaScript, TypeScript, Redux, Node.js, HTML5, CSS3, Git"
 
-• experience: 1-2 job entries ONLY. Each entry format:
-  "[Job Title] | [Company Name] | [Year Range]\\n• Responsibility (1 line with action verb + result)\\n• Responsibility (1 line with action verb + result)\\n• Responsibility (1 line with action verb + result)"
+• experience: 1-2 job entries. Format:
+  "[Job Title] | [Company Name] | [Year Range]\\n• Responsibility with action verb and result\\n• Responsibility with action verb and result\\n• Responsibility with action verb and result"
 
-  Use realistic company names. Each bullet = 1 line, concise, with numbers.
-
-• education: 1 entry ONLY. Format:
+• education: 1 entry. Format:
   "[Degree] | [University] | [Year Range]\\nGPA: X.X/4.0 | [Honor]"
 
-• certifications: 2-3 certifications ONLY.
-
-• achievements (for awards field): 2 achievements ONLY.
-
-• projects: 1 project ONLY.
+• certifications: 2-3 items.
 
 • linkedin: "linkedin.com/in/[lowercase-name]"
 
@@ -275,7 +350,7 @@ Return ONLY the JSON.`;
   if (isSchool) {
     return `${baseRules}
 
-You are a school administrator. Generate a professional school document with realistic details.
+You are a school administrator. Generate a professional school document.
 
 • Realistic roll numbers, admission numbers
 • Realistic dates
@@ -287,7 +362,7 @@ Return ONLY the JSON.`;
 
   return `${baseRules}
 
-Generate realistic, professional content for the document. Keep it concise and appropriate.
+Generate realistic, professional content for the document.
 
 Return ONLY the JSON.`;
 }
