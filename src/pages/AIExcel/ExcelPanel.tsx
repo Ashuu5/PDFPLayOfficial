@@ -204,7 +204,7 @@ export default function ExcelPanel() {
             onChange={(e) => setPrompt(e.target.value)}
             rows={2}
             className="flex-1 bg-transparent text-[13px] text-gray-700 dark:text-gray-300 placeholder-gray-400 resize-none outline-none leading-snug"
-            placeholder="Try: 'placeholder="Describe what Excel file you want..."'"
+            placeholder="Describe what Excel file you want..."
           />
           <button
             onClick={handleGenerate}
