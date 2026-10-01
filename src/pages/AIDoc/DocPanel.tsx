@@ -43,6 +43,7 @@ export default function DocPanel() {
   const [generatedTemplate, setGeneratedTemplate] = useState<DocTemplate | null>(null);
   const [generatedData, setGeneratedData] = useState<UserData>({});
   const [isAIGenerated, setIsAIGenerated] = useState(false);
+  const [generatedHTML, setGeneratedHTML] = useState<string | null>(null);
 
   // ============================================================
   // FILE UPLOAD
@@ -68,7 +69,96 @@ export default function DocPanel() {
   };
 
   // ============================================================
-  // MAIN GENERATE — Template match karo, warna AI khud banaye
+  // PARSE PROMPT TO STRUCTURED DATA (for AI fallback)
+  // ============================================================
+  const parsePromptToData = async (
+    userPrompt: string,
+    documentType: string
+  ): Promise<UserData> => {
+    try {
+      const response = await fetch('/api/groq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: userPrompt }],
+          systemPrompt: `Extract structured data from this request for a ${documentType}.
+
+Return ONLY valid JSON with these fields:
+{
+  "title": "the document title (e.g. 'Result Card', 'Invoice', 'Certificate')",
+  "recipientName": "the person's name",
+  "fatherName": "father's name if mentioned",
+  "schoolName": "school/company name if mentioned",
+  "className": "class or grade if mentioned",
+  "rollNumber": "roll number if mentioned",
+  "marks": "marks or percentage if mentioned",
+  "subject": "subjects if mentioned",
+  "date": "today's date in format like January 15, 2025",
+  "details": "any other important details"
+}
+
+Use empty string "" for fields not mentioned. Return ONLY JSON.`,
+          model: 'openai/gpt-oss-120b',
+          maxTokens: 500,
+        }),
+      });
+
+      if (!response.ok) return { title: documentType, date: todayString() };
+
+      const data = await response.json();
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) return { title: documentType, date: todayString() };
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) return { title: documentType, date: todayString() };
+
+      return JSON.parse(jsonMatch[0]);
+    } catch {
+      return { title: documentType, date: todayString() };
+    }
+  };
+
+  const todayString = () => {
+    return new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  // ============================================================
+  // EXTRACT DOCUMENT TYPE FROM PROMPT
+  // ============================================================
+  const extractDocumentTypeFromPrompt = (p: string): string => {
+    const lower = p.toLowerCase();
+    if (lower.includes('result')) return 'result card';
+    if (lower.includes('marks')) return 'marks sheet';
+    if (lower.includes('fee receipt') || lower.includes('fee voucher')) return 'fee receipt';
+    if (lower.includes('receipt')) return 'receipt';
+    if (lower.includes('invitation')) return 'invitation card';
+    if (lower.includes('menu')) return 'menu';
+    if (lower.includes('flyer')) return 'flyer';
+    if (lower.includes('poster')) return 'poster';
+    if (lower.includes('certificate')) return 'certificate';
+    if (lower.includes('character')) return 'character certificate';
+    if (lower.includes('bonafide')) return 'bonafide certificate';
+    if (lower.includes('transfer')) return 'transfer certificate';
+    if (lower.includes('admission')) return 'admission form';
+    if (lower.includes('id card')) return 'id card';
+    if (lower.includes('letter')) return 'letter';
+    if (lower.includes('notice')) return 'notice';
+    if (lower.includes('circular')) return 'circular';
+    if (lower.includes('report')) return 'report';
+    if (lower.includes('form')) return 'form';
+    if (lower.includes('agreement') || lower.includes('contract')) return 'agreement';
+    if (lower.includes('proposal')) return 'proposal';
+    if (lower.includes('cv') || lower.includes('resume')) return 'resume';
+    if (lower.includes('invoice')) return 'invoice';
+    return 'document';
+  };
+
+  // ============================================================
+  // MAIN GENERATE
   // ============================================================
   const handleGenerate = async () => {
     setError(null);
@@ -76,6 +166,7 @@ export default function DocPanel() {
     setGeneratedTemplate(null);
     setGeneratedData({});
     setIsAIGenerated(false);
+    setGeneratedHTML(null);
 
     if (!prompt.trim()) {
       setError('Please enter a prompt');
@@ -101,11 +192,10 @@ export default function DocPanel() {
       const template = findDocTemplate(prompt);
 
       if (template) {
-        // ✅ Template matched — use template system
+        // ✅ Template matched
         const data = await extractDataFromPrompt(finalPrompt, template.id);
         const userData: UserData = { ...(data || {}) };
 
-        // Attach first image
         const firstImage = uploadedFiles.find((f) => f.fileType === 'image');
         if (firstImage?.imageDataUrl) {
           userData.photo = firstImage.imageDataUrl;
@@ -118,40 +208,47 @@ export default function DocPanel() {
           `✅ ${template.name} is ready! Choose your download format below.`
         );
       } else {
-        // ❌ No template matched — AI generates custom design
-        setSuccessMessage(
-          '✨ No matching template found. AI is creating a custom design for you...'
-        );
+        // ❌ No template — AI generates custom design
+        setSuccessMessage('✨ AI is creating a custom design for you...');
 
-        // Generate custom HTML design directly
         const documentType = extractDocumentTypeFromPrompt(prompt);
 
-        const html = await generateHTMLDesign({
-          documentType,
-          userData: { description: prompt },
-          styleHint: 'modern, professional, elegant',
-        });
+        // Parse prompt to structured data first
+        const parsedData = await parsePromptToData(prompt, documentType);
 
-        if (!html) {
-          throw new Error('AI could not generate design. Please try again.');
+        // Try AI HTML generation
+        let html: string | null = null;
+        try {
+          html = await generateHTMLDesign({
+            documentType,
+            userData: parsedData,
+            styleHint: 'modern, professional, elegant',
+          });
+        } catch (err) {
+          console.error('AI generation failed:', err);
         }
 
-        // Create a fake template for storage
+        // Fallback if AI failed
+        if (!html) {
+          html = generateSimpleHTML(documentType, parsedData);
+        }
+
         const customTemplate: DocTemplate = {
           id: 'custom-ai',
-          name: 'Custom AI Document',
+          name: documentType.charAt(0).toUpperCase() + documentType.slice(1),
           category: 'business',
           description: 'AI-generated custom document',
           keywords: [],
-          fileName: 'Custom_Document.docx',
+          fileName: `${documentType.replace(/\s+/g, '_')}.docx`,
           sections: [],
         };
 
         setGeneratedTemplate(customTemplate);
-        setGeneratedData({ description: prompt, aiHtml: html });
+        setGeneratedData(parsedData);
         setIsAIGenerated(true);
+        setGeneratedHTML(html);
         setSuccessMessage(
-          '✅ Your custom AI design is ready! Choose PDF (perfect design) or DOCX (editable).'
+          '✅ Your custom AI document is ready! Choose PDF or DOCX below.'
         );
       }
     } catch (err: any) {
@@ -168,8 +265,39 @@ export default function DocPanel() {
     if (!generatedTemplate) return;
     try {
       if (isAIGenerated) {
-        // For AI-generated: create simple DOCX from data
-        await generateDocxFromCustomData(generatedData, 'Custom_Document');
+        // Simple DOCX from data
+        const simpleTemplate: DocTemplate = {
+          id: 'custom',
+          name: generatedTemplate.name,
+          category: 'business',
+          description: 'AI-generated',
+          keywords: [],
+          fileName: generatedTemplate.fileName,
+          sections: [
+            { type: 'heading', text: `{{title}}`, alignment: 'center', size: 24, color: '#6D28D9' },
+            { type: 'spacer' },
+            { type: 'divider' },
+            { type: 'spacer' },
+            { type: 'paragraph', text: '{{recipientName}}', bold: true, size: 14 },
+            { type: 'spacer' },
+            { type: 'paragraph', text: 'School / Organization: {{schoolName}}' },
+            { type: 'paragraph', text: 'Class / Grade: {{className}}' },
+            { type: 'paragraph', text: 'Roll Number: {{rollNumber}}' },
+            { type: 'paragraph', text: 'Marks / Percentage: {{marks}}' },
+            { type: 'paragraph', text: 'Subject: {{subject}}' },
+            { type: 'spacer' },
+            { type: 'paragraph', text: '{{details}}' },
+            { type: 'spacer' },
+            { type: 'spacer' },
+            { type: 'paragraph', text: 'Date: {{date}}', alignment: 'right' },
+            { type: 'spacer' },
+            { type: 'paragraph', text: 'Authorized Signature: _______________________', alignment: 'right' },
+          ],
+        };
+        await generateDocx(simpleTemplate, {
+          ...generatedData,
+          title: generatedTemplate.name,
+        });
       } else {
         await generateDocx(generatedTemplate, generatedData);
       }
@@ -191,9 +319,8 @@ export default function DocPanel() {
     try {
       let html: string;
 
-      if (isAIGenerated) {
-        // AI already generated HTML — use it
-        html = generatedData.aiHtml || generateSimpleHTML('document', { description: prompt });
+      if (isAIGenerated && generatedHTML) {
+        html = generatedHTML;
       } else {
         // Generate from AI HTML
         const documentType = getDocumentTypeFromTemplate(generatedTemplate.id);
@@ -214,10 +341,11 @@ export default function DocPanel() {
       container.style.minHeight = '297mm';
       container.style.background = '#ffffff';
       container.style.fontFamily = 'Arial, Helvetica, sans-serif';
+      container.style.padding = '0';
       container.innerHTML = html;
       document.body.appendChild(container);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
       const canvas = await html2canvas(container, {
         scale: 3,
@@ -252,7 +380,7 @@ export default function DocPanel() {
         heightLeft -= pdfHeight;
       }
 
-      pdf.save(`document_${Date.now()}.pdf`);
+      pdf.save(`${generatedTemplate.name.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
       setSuccessMessage('✅ PDF downloaded.');
     } catch (err: any) {
       setError(err.message || 'Failed to generate PDF');
@@ -262,54 +390,7 @@ export default function DocPanel() {
   };
 
   // ============================================================
-  // HELPER: Extract document type from prompt (for AI)
-  // ============================================================
-  const extractDocumentTypeFromPrompt = (prompt: string): string => {
-    const lower = prompt.toLowerCase();
-    if (lower.includes('result')) return 'result card';
-    if (lower.includes('marks')) return 'marks sheet';
-    if (lower.includes('receipt')) return 'receipt';
-    if (lower.includes('invitation')) return 'invitation';
-    if (lower.includes('menu')) return 'menu';
-    if (lower.includes('flyer')) return 'flyer';
-    if (lower.includes('poster')) return 'poster';
-    if (lower.includes('certificate')) return 'certificate';
-    if (lower.includes('letter')) return 'letter';
-    if (lower.includes('notice')) return 'notice';
-    if (lower.includes('circular')) return 'circular';
-    if (lower.includes('report')) return 'report';
-    if (lower.includes('form')) return 'form';
-    if (lower.includes('agreement')) return 'agreement';
-    return 'document';
-  };
-
-  // ============================================================
-  // HELPER: Generate simple DOCX for AI-generated content
-  // ============================================================
-  const generateDocxFromCustomData = async (data: UserData, name: string) => {
-    const simpleTemplate: DocTemplate = {
-      id: 'custom',
-      name,
-      category: 'business',
-      description: 'AI-generated document',
-      keywords: [],
-      fileName: `${name}.docx`,
-      sections: [
-        { type: 'heading', text: '{{documentTitle}}', alignment: 'center', size: 24, color: '#6D28D9' },
-        { type: 'spacer' },
-        { type: 'divider' },
-        { type: 'spacer' },
-        { type: 'paragraph', text: '{{description}}' },
-      ],
-    };
-    await generateDocx(simpleTemplate, {
-      documentTitle: name.replace(/_/g, ' '),
-      description: data.description || '',
-    });
-  };
-
-  // ============================================================
-  // DIRECT DOWNLOAD (blank template card)
+  // DIRECT DOWNLOAD (blank template)
   // ============================================================
   const downloadTemplate = async (templateId: string) => {
     const template = docTemplates.find((t) => t.id === templateId);
