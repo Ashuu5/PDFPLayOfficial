@@ -2,7 +2,6 @@ import { useState, useRef } from 'react';
 import {
   Sparkles,
   Upload,
-  ChevronDown,
   ArrowRight,
   LayoutGrid,
   FileSpreadsheet,
@@ -18,8 +17,6 @@ import MissingFieldsModal from './MissingFieldsModal';
 
 export default function ExcelPanel() {
   const [prompt, setPrompt] = useState('');
-  const [language, setLanguage] = useState('English');
-  const [langOpen, setLangOpen] = useState(false);
   const [files, setFiles] = useState<ParsedFile[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -28,8 +25,6 @@ export default function ExcelPanel() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const languages = ['English', 'Urdu', 'Arabic', 'Spanish', 'French', 'Chinese'];
 
   // ============================================================
   // FILE UPLOAD
@@ -121,7 +116,7 @@ export default function ExcelPanel() {
       }
 
       setError(
-        'Could not detect a formula or template. Try: "50 bando ki sales report banao" or mention a formula like XLOOKUP, SUM, VLOOKUP, IF, etc.'
+        'Could not detect a formula or template. Try mentioning a formula like XLOOKUP, SUM, VLOOKUP, IF, or describe a template like "sales report".'
       );
       return;
     }
@@ -166,7 +161,11 @@ export default function ExcelPanel() {
   // ============================================================
   // DOWNLOAD TEMPLATE (direct)
   // ============================================================
-  const downloadTemplate = async (templateId: string, templateName: string, fileName: string) => {
+  const downloadTemplate = async (
+    templateId: string,
+    templateName: string,
+    fileName: string
+  ) => {
     setIsGenerating(true);
     setError(null);
     setSuccessMessage(null);
@@ -244,59 +243,20 @@ export default function ExcelPanel() {
           className="hidden"
           onChange={(e) => handleFileUpload(e.target.files)}
         />
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-              <Upload className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-            </div>
-            <div>
-              <p className="text-[13px] font-semibold text-gray-900 dark:text-white">
-                Upload file for VLOOKUP / XLOOKUP
-              </p>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-                Drag & drop .xlsx or .csv file here · or{' '}
-                <span className="text-purple-500 dark:text-purple-400 underline">
-                  Browse files
-                </span>
-              </p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+            <Upload className="w-5 h-5 text-purple-500 dark:text-purple-400" />
           </div>
-
-          {/* Language dropdown */}
-          <div className="relative">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setLangOpen(!langOpen);
-              }}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.05] text-[12px] font-medium text-gray-700 dark:text-gray-300 hover:border-purple-400/50 transition-all"
-            >
-              {language}
-              <ChevronDown
-                className={`w-3.5 h-3.5 transition-transform ${langOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
-            {langOpen && (
-              <div className="absolute top-full right-0 mt-1 w-32 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1a1a1f] shadow-2xl py-1 z-20">
-                {languages.map((l) => (
-                  <button
-                    key={l}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLanguage(l);
-                      setLangOpen(false);
-                    }}
-                    className={`block w-full text-left px-3 py-1.5 text-[12px] transition-colors ${
-                      language === l
-                        ? 'text-purple-500 bg-purple-500/10'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
-            )}
+          <div>
+            <p className="text-[13px] font-semibold text-gray-900 dark:text-white">
+              Upload file for VLOOKUP / XLOOKUP
+            </p>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+              Drag & drop .xlsx or .csv file here · or{' '}
+              <span className="text-purple-500 dark:text-purple-400 underline">
+                Browse files
+              </span>
+            </p>
           </div>
         </div>
 
@@ -364,7 +324,9 @@ export default function ExcelPanel() {
           {allTemplates.map((template) => (
             <button
               key={template.id}
-              onClick={() => downloadTemplate(template.id, template.name, template.fileName)}
+              onClick={() =>
+                downloadTemplate(template.id, template.name, template.fileName)
+              }
               disabled={isGenerating}
               className="group text-left rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] p-3 hover:border-purple-400/50 hover:shadow-[0_10px_30px_-15px_rgba(139,92,246,0.4)] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
