@@ -17,9 +17,7 @@ import { findTemplate, templates as allTemplates } from '../../lib/templates';
 import MissingFieldsModal from './MissingFieldsModal';
 
 export default function ExcelPanel() {
-  const [prompt, setPrompt] = useState(
-    'Create a sales report with VLOOKUP/XLOOKUP to match product IDs and calculate revenue'
-  );
+  const [prompt, setPrompt] = useState('');
   const [language, setLanguage] = useState('English');
   const [langOpen, setLangOpen] = useState(false);
   const [files, setFiles] = useState<ParsedFile[]>([]);
@@ -206,7 +204,7 @@ export default function ExcelPanel() {
             onChange={(e) => setPrompt(e.target.value)}
             rows={2}
             className="flex-1 bg-transparent text-[13px] text-gray-700 dark:text-gray-300 placeholder-gray-400 resize-none outline-none leading-snug"
-            placeholder="Try: '50 bando ki sales report banao' or 'File 1 ke A column ko File 2 se match karo'"
+            placeholder="Try: 'placeholder="Describe what Excel file you want..."'"
           />
           <button
             onClick={handleGenerate}
