@@ -1,3 +1,4 @@
+import CanonicalTag from './CanonicalTag';
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, Sun, Moon, Sparkles, FileSpreadsheet } from 'lucide-react';
@@ -271,6 +272,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col text-gray-200 relative z-10">
       <ScrollToTop />
+      <CanonicalTag />
 
       <nav
         className={`sticky top-0 z-50 transition-all duration-300 ${
