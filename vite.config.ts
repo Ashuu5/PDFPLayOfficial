@@ -4,7 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 import Sitemap from 'vite-plugin-sitemap'
 
 const routes = [
-  '/',
   '/ai-excel',
   '/merge-pdf',
   '/split-pdf',
