@@ -1,47 +1,87 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
-<!-- Favicon -->
-<link rel="icon" href="/favicon.ico" sizes="any" />
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<link rel="manifest" href="/site.webmanifest" />
+    <!-- ✅ DEFAULT CANONICAL (homepage) -->
+    <link rel="canonical" href="https://pdfplayofficial.com/" />
 
-<!-- Structured Data — Logo -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "PDFplayOfficial",
-  "url": "https://pdfplayofficial.com/",
-  "logo": "https://pdfplayofficial.com/logo.svg",
-  "description": "Merge, split, compress, convert, edit, and manage your PDF files online. No signup. No login. No hassle. 100% free PDF tools."
-}
-</script>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "PDFplayOfficial",
-  "url": "https://pdfplayofficial.com/",
-  "logo": "https://pdfplayofficial.com/logo.svg"
-}
-</script>
-
+    <!-- Charset & Viewport -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
     <title>PDFplayOfficial - Every PDF Tool You Need. Free and Simple.</title>
-    <meta name="description" content="Merge, split, compress, convert, edit, and manage your PDF files online. No signup. No login. No hassle. 100% free PDF tools." />
+    <meta
+      name="description"
+      content="Merge, split, compress, convert, edit, and manage your PDF files online. No signup. No login. No hassle. 100% free PDF tools."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7620557599051337"
-     crossorigin="anonymous"></script>
+    <!-- ✅ Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pdfplayofficial.com/" />
+    <meta property="og:title" content="PDFplayOfficial - Every PDF Tool You Need" />
+    <meta
+      property="og:description"
+      content="Merge, split, compress, convert, edit PDF files online. Free, no signup."
+    />
+    <meta property="og:image" content="https://pdfplayofficial.com/logo.svg" />
+    <meta property="og:site_name" content="PDFplayOfficial" />
 
+    <!-- ✅ Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PDFplayOfficial - Every PDF Tool You Need" />
+    <meta
+      name="twitter:description"
+      content="Merge, split, compress, convert, edit PDF files online. Free, no signup."
+    />
+    <meta name="twitter:image" content="https://pdfplayofficial.com/logo.svg" />
+
+    <!-- ✅ Structured Data — WebSite -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "PDFplayOfficial",
+        "url": "https://pdfplayofficial.com/",
+        "logo": "https://pdfplayofficial.com/logo.svg",
+        "description": "Merge, split, compress, convert, edit, and manage your PDF files online. No signup. No login. No hassle. 100% free PDF tools."
+      }
+    </script>
+
+    <!-- ✅ Structured Data — Organization -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "PDFplayOfficial",
+        "url": "https://pdfplayofficial.com/",
+        "logo": "https://pdfplayofficial.com/logo.svg"
+      }
+    </script>
+
+    <!-- Google AdSense -->
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7620557599051337"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -68,6 +108,7 @@
         },
       }
     </script>
+
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font-family: 'Inter', system-ui, sans-serif; background-color: #f8fafc; color: #1e293b; }
